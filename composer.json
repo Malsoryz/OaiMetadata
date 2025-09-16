@@ -1,0 +1,15 @@
+{
+    "name": "malsoryz/oai-metadata-format",
+    "autoload": {
+        "psr-4": {
+            "Malsoryz\\OaiMetadataFormat\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Malsoryz",
+            "email": "ikmalalansory@gmail.com"
+        }
+    ],
+    "require": {}
+}

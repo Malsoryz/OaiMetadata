@@ -1,10 +1,7 @@
 <?php
 
-use App\Classes\Plugin;
+require 'vendor/autoload.php';
 
-return new class extends Plugin
-{
-    public function boot()
-    {
-    }
-};
+use Malsoryz\OaiMetadataFormat\OaiMetadataFormatPlugin;
+
+return new OaiMetadataFormatPlugin;
