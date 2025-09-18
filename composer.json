@@ -2,7 +2,7 @@
     "name": "malsoryz/oai-metadata-format",
     "autoload": {
         "psr-4": {
-            "Malsoryz\\OaiMetadataFormat\\": "src/"
+            "OaiMetadataFormat\\": "src/"
         }
     },
     "authors": [
@@ -11,5 +11,7 @@
             "email": "ikmalalansory@gmail.com"
         }
     ],
-    "require": {}
+    "require": {
+        "spatie/array-to-xml": "^3.4"
+    }
 }

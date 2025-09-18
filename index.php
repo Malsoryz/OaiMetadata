@@ -2,6 +2,6 @@
 
 require 'vendor/autoload.php';
 
-use Malsoryz\OaiMetadataFormat\OaiMetadataFormatPlugin;
+use OaiMetadataFormat\OaiMetadataFormatPlugin;
 
 return new OaiMetadataFormatPlugin;
