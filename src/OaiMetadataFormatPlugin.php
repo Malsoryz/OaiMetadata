@@ -3,7 +3,6 @@
 namespace OaiMetadataFormat;
 
 use App\Classes\Plugin;
-
 use Illuminate\Support\Facades\Route;
 
 use OaiMetadataFormat\Controllers\OaiController;
@@ -20,7 +19,7 @@ class OaiMetadataFormatPlugin extends Plugin
     protected function registerRoute(): void
     {
         Route::get('{conference:path}/lib/xsl/oai2.xsl', function (Conference $conference) {
-            $path = base_path('plugins/OAIMetadataFormat/resources/xsl/oai2.xsl');
+            $path = $this->getAssetsPath('public/lib/xsl/oai2.xsl');
 
             if (!file_exists($path)) {
                 abort(404, 'Stylesheet not found.');
