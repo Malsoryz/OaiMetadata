@@ -1,15 +1,15 @@
 <?php
 
-namespace OaiMetadataFormat;
+namespace Malsoryz\OaiXml;
 
 use App\Classes\Plugin;
 use Illuminate\Support\Facades\Route;
 
-use OaiMetadataFormat\Controllers\OaiController;
+use Malsoryz\OaiXml\Controllers\OaiController;
 
 use App\Models\Conference;
 
-class OaiMetadataFormatPlugin extends Plugin
+class OaiXml extends Plugin
 {
     public function boot()
     {

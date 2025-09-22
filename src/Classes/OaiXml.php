@@ -1,16 +1,16 @@
 <?php
 
-namespace OaiMetadataFormat\Classes;
+namespace Malsoryz\OaiXml\Classes;
 
 use App\Models\Conference;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Http\Request;
-use OaiMetadataFormat\Classes\OaiXml\ListRecords;
-use OaiMetadataFormat\Enums\ErrorCodes;
-use OaiMetadataFormat\Enums\Metadata\DublinCore as DCEnum;
-use OaiMetadataFormat\Enums\Verb;
-use OaiMetadataFormat\Metadata\DublinCore;
+use Malsoryz\OaiXml\Classes\OaiXml\ListRecords;
+use Malsoryz\OaiXml\Enums\ErrorCodes;
+use Malsoryz\OaiXml\Enums\Metadata\DublinCore as DCEnum;
+use Malsoryz\OaiXml\Enums\Verb;
+use Malsoryz\OaiXml\Metadata\DublinCore;
 use Spatie\ArrayToXml\ArrayToXml as Xml;
 
 class OaiXml extends Xml

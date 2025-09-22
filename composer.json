@@ -2,7 +2,7 @@
     "name": "malsoryz/oai-metadata-format",
     "autoload": {
         "psr-4": {
-            "OaiMetadataFormat\\": "src/"
+            "Malsoryz\\OaiXml\\": "src/"
         }
     },
     "authors": [

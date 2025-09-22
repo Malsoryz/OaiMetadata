@@ -1,10 +1,10 @@
 <?php
 
-namespace OaiMetadataFormat\Classes;
+namespace Malsoryz\OaiXml\Classes;
 
 use App\Models\Conference;
-use OaiMetadataFormat\Classes\OaiXml;
-use OaiMetadataFormat\Enums\Verb;
+use Malsoryz\OaiXml\Classes\OaiXml;
+use Malsoryz\OaiXml\Enums\Verb;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Spatie\ArrayToXml\ArrayToXml;

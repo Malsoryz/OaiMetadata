@@ -1,6 +1,6 @@
 <?php
 
-namespace OaiMetadataFormat\Metadata;
+namespace Malsoryz\OaiXml\Metadata;
 
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;

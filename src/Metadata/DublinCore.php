@@ -1,8 +1,8 @@
 <?php
 
-namespace OaiMetadataFormat\Metadata;
+namespace Malsoryz\OaiXml\Metadata;
 
-use OaiMetadataFormat\Metadata\Metadata;
+use Malsoryz\OaiXml\Metadata\Metadata;
 
 class DublinCore extends Metadata
 {

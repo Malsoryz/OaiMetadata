@@ -1,6 +1,6 @@
 <?php
 
-namespace OaiMetadataFormat\Enums;
+namespace Malsoryz\OaiXml\Enums;
 
 enum Verb: string {
     case Identify = 'Identify';

@@ -1,5 +1,5 @@
-name: OAI-metadata-format
-folder: OAIMetadataFormat
+name: OAI-XML
+folder: OAI-XML
 author: Malsoryz
 description: 'Leconfe OAI Metadata Plugin'
 version: 1.0.0
