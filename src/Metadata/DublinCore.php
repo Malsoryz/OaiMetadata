@@ -3,6 +3,7 @@
 namespace Malsoryz\OaiXml\Metadata;
 
 use Malsoryz\OaiXml\Metadata\Metadata;
+use Malsoryz\OaiXml\Enums\Metadata\DublinCore as DCEnum;
 
 class DublinCore extends Metadata
 {
@@ -29,5 +30,25 @@ class DublinCore extends Metadata
             'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
             'xsi:schemaLocation' => self::$metadataNamespace.' '.self::$schema,
         ];
+    }
+
+    public static function serialize(array $data): array
+    {
+        $metadataRootElement = self::$metadataPrefix.':'.self::$prefix;
+
+        $record = [];
+
+        $orders = DCEnum::getElementOrder();
+
+        foreach ($orders as $order) {
+            if (array_key_exists($order, $data)) {
+                [$name, $dataValue] = DCEnum::make($order, $data[$order]);
+                $record[$metadataRootElement][$name] = $dataValue;
+            }
+        }
+
+        $record[$metadataRootElement]['_attributes'] = self::getMetadataAttributes();
+
+        return $record;
     }
 }

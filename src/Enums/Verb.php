@@ -2,7 +2,8 @@
 
 namespace Malsoryz\OaiXml\Enums;
 
-enum Verb: string {
+enum Verb: string 
+{
     case Identify = 'Identify';
     case GetRecord = 'GetRecord';
     case ListRecords = 'ListRecords';
@@ -60,9 +61,14 @@ enum Verb: string {
                 self::QUERY_UNTIL,
                 self::QUERY_SET,
             ],
-            self::ListSets, self::ListMetadataFormats => [
+            self::ListSets => [
                 self::QUERY_VERB,
                 self::QUERY_RESUMPTION_TOKEN,
+            ],
+            self::ListMetadataFormats => [
+                self::QUERY_VERB,
+                self::QUERY_RESUMPTION_TOKEN,
+                self::QUERY_IDENTIFIER,
             ],
             default => [],
         };

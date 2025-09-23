@@ -3,7 +3,10 @@
     "autoload": {
         "psr-4": {
             "Malsoryz\\OaiXml\\": "src/"
-        }
+        },
+        "files": [
+            "src/helper.php"
+        ]
     },
     "authors": [
         {

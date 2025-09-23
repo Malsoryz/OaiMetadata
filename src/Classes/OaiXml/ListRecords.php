@@ -1,48 +1,45 @@
 <?php
 
-namespace OaiMetadataFormat\Classes\OaiXml;
+namespace Malsoryz\OaiXml\Classes\OaiXml;
 
-use Illuminate\Support\Arr;
+use App\Models\Conference;
+use App\Models\Enums\SubmissionStatus;
+
+use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use InvalidArgumentException;
-use OaiMetadataFormat\Metadata\Metadata;
+use Malsoryz\OaiXml\Metadata\Metadata;
+use Malsoryz\OaiXml\Enums\Metadata as EnumMetadata;
+
+use Malsoryz\OaiXml\Classes\OaiXml\GetRecord;
 
 class ListRecords
 {
-    protected array $record = [];
+    protected Request $request;
+    protected Collection $submissions;
+
+    protected const IDENTIFIER_RECORD_PREFIX = 'paper';
 
     public function __construct(
-        array $header,
-        // array $data,
-        // Metadata|string|null $metadata = null,
+        Request $request,
+        Conference $conference,
     ) {
-        $this->record = ['record' => []];
-
-        if (Arr::get($header, 'identifier')) {
-            Arr::set($this->record, 'record.header.identifier', $header['identifier']);
-        } else throw new InvalidArgumentException("\$header[] must have 'identifier'");
-        
-        if (Arr::get($header, 'datestamp')) {
-            $getDatestamp = $header['datestamp'] instanceof Carbon
-                ? $header['datestamp']
-                : Carbon::parse($header['datestamp']);
-
-            Arr::set($this->record, 'record.header.datestamp', $getDatestamp->format('Y-m-d'));
-        } else throw new InvalidArgumentException("\$header[] must have 'datestamp'");
-        
-        if (Arr::get($header, 'setSpec')) {
-            $getSetSpec = is_array($header['setSpec'])
-                ? Arr::mapWithKeys($header['setSpec'], fn ($item) => ['_value' => $item])
-                : $header['setSpec'];
-
-            Arr::set($this->record, 'record.header.setSpec', $getSetSpec);
-        };
-
-        // Arr::set($this->record, 'record.metadata', $metadata::handle($data));
+        $this->request = $request;
+        $this->submissions = $conference->submission()
+            ->where('status', SubmissionStatus::Published)
+            ->get();
     }
 
-    public function getRecord(): array
+    public function getRecords(): array
     {
-        return $this->record;
+        $records = [];
+
+        foreach ($this->submissions as $submission) {
+            $newRecord = new GetRecord($submission, $this->request);
+            $records['record'][] = $newRecord->get();
+        }
+
+        return $records;
     }
 }

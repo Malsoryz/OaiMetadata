@@ -2,7 +2,8 @@
 
 namespace Malsoryz\OaiXml\Enums;
 
-enum ErrorCodes: string {
+enum ErrorCodes: string 
+{
     case BadArgument = 'badArgument';
     case BadResumptionToken = 'badResumptionToken';
     case BadVerb = 'badVerb';

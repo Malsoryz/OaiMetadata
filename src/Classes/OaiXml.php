@@ -15,6 +15,7 @@ use Spatie\ArrayToXml\ArrayToXml as Xml;
 
 class OaiXml extends Xml
 {
+    protected Conference $conference;
     protected Xml $xml;
     protected array $errors = [];
     protected array $requestAttributes = [];
@@ -31,6 +32,8 @@ class OaiXml extends Xml
         array | null $options = ['convertNullToXsiNil' => false, 'convertBoolToString' => false]
     )
     {
+        $this->conference = $conference;
+
         $this->xml = new Xml(
             array: $this->handleResponse($request, $responseDate),
             rootElement: $this->rootElement(),
@@ -43,7 +46,7 @@ class OaiXml extends Xml
             options: $options
         );
 
-        $this->xml->addProcessingInstruction('xml-stylesheet', 'type="text/xsl" href="' . route('oai2.xsl', ['conference' => $conference]) . '"');
+        $this->xml->addProcessingInstruction('xml-stylesheet', 'type="text/xsl" href="' . asset('plugin/oaixml/lib/xsl/oai2.xsl') . '"');
     }
 
     public function getXml()
@@ -87,183 +90,117 @@ class OaiXml extends Xml
     public function handleResponse(Request $request, Carbon $responseDate): array
     {
         $isError = $this->checkQueryErrors($request);
-        return [
+        $response = [
             'responseDate' => $responseDate->toIso8601ZuluString(),
             'request' => [
                 '_value' => $request->url(),
-                ...($isError ? [] : ['_attributes' => $this->requestAttributes])
             ],
-            ...($isError ? $this->errors : $this->handledVerb),
         ];
+
+        if (! $isError) {
+            if ($verb = Verb::tryFrom($request->query(Verb::QUERY_VERB))) {
+                $response[$verb->value] = [];
+
+                // request attributes
+                $allowedQueries = $verb->allowedQuery();
+                foreach ($allowedQueries as $query) {
+                    if ($getQuery = $request->query($query)) {
+                        $this->requestAttributes[$query] = $getQuery;
+                    }
+                }
+                $response['request']['_attributes'] = $this->requestAttributes;
+
+                // handle verb
+                $response[$verb->value] = method_exists($this, $verb->value) ? $this->{$verb->value}($verb, $request) : [];
+            }
+        } else {
+            $response['error'] = $this->errors;
+        }
+
+        return $response;
     }
 
     public function checkQueryErrors(Request $request): bool
     {
         $queries = $this->retrieveUrlQuery($request);
 
-        $errors = Collection::wrap($this->errors);
-
         // jika tidak ada verb
         if ($request->query(Verb::QUERY_VERB) === ErrorCodes::MISSING_ARGUMENT) {
-            $errors->push([
-                '_value' => 'The request does not provide any verb.',
+            $this->errors[] = [
+                '_value' => __('OaiXml::error.verb.missing'),
                 '_attributes' => [
                     'code' => ErrorCodes::BadVerb->value,
                 ],
-            ]);
-        }
-
-        // jika verb illegal
-        if (
-            $request->query(Verb::QUERY_VERB) !== ErrorCodes::MISSING_ARGUMENT  
-            && (! Verb::tryFrom($queries->get(Verb::QUERY_VERB))) 
-            && $queries->get(Verb::QUERY_VERB) !== ErrorCodes::REPEATED_ARGUMENT
-        ) {
-            $errors->push([
-                '_value' => "{$queries->get(Verb::QUERY_VERB)} is a illegal verb.",
-                '_attributes' => [
-                    'code' => ErrorCodes::BadVerb->value,
-                ],
-            ]);
-        }
-
-        // jika argumen paramter berulang
-        if ($queries->get(Verb::QUERY_VERB) === ErrorCodes::REPEATED_ARGUMENT) {
-            $errors->push([
-                '_value' => 'Do not use them same argument more than once.',
-                '_attributes' => [
-                    'code' => ErrorCodes::BadVerb->value,
-                ],
-            ]);
-            
-            if (! Verb::tryFrom($request->query(Verb::QUERY_VERB))) {
-                $errors->push([
-                    '_value' => "{$request->query(Verb::QUERY_VERB)} is a illegal verb.",
+            ];
+        } else {
+            // jika verb illegal
+            if (! Verb::tryFrom($queries->get(Verb::QUERY_VERB)) && $queries->get(Verb::QUERY_VERB) !== ErrorCodes::REPEATED_ARGUMENT) {
+                $this->errors[] = [
+                    '_value' => __('OaiXml::error.verb.illegal', ['hint' => $queries->get(Verb::QUERY_VERB)]),
                     '_attributes' => [
                         'code' => ErrorCodes::BadVerb->value,
                     ],
-                ]);
+                ];
             }
+        }
 
-            if ($verb = Verb::tryFrom($request->query(Verb::QUERY_VERB))) {
-                $requiredQueries = Collection::wrap($verb->requiredQuery());
-                foreach ($requiredQueries as $query) {
-                    if (! $queries->get($query)) {
-                        $errors->push([
-                            '_value' => "Missing {$query} parameter",
-                            '_attributes' => [
-                                'code' => ErrorCodes::BadArgument->value,
-                            ],
-                        ]);
-                    }
-                }
-
-                $allowedQueries = Collection::wrap($verb->allowedQuery());
-                foreach ($queries->keys() as $query) {
-                    if (! $allowedQueries->contains($query)) {
-                        $errors->push([
-                            '_value' => "{$query} is a illegal parameter.",
-                            '_attributes' => [
-                                'code' => ErrorCodes::BadArgument->value,
-                            ],
-                        ]);
-                    }
-                }
+        foreach ($queries as $query => $value) {
+            if ($value === ErrorCodes::REPEATED_ARGUMENT) {
+                $this->errors[] = [
+                    '_value' => __('OaiXml::error.argument.repeated', ['hint' => $query]),
+                    '_attributes' => [
+                        'code' => ErrorCodes::BadVerb->value,
+                    ],
+                ];
             }
         }
 
         // Jika verb legal atau valid
-        if ($verb = Verb::tryFrom($queries->get(Verb::QUERY_VERB))) {
+        if ($verb = Verb::tryFrom($request->query(Verb::QUERY_VERB))) {
             $requiredQueries = Collection::wrap($verb->requiredQuery());
             foreach ($requiredQueries as $query) {
-                if (! $queries->get($query)) {
-                    $errors->push([
-                        '_value' => "Missing {$query} parameter",
+                if (! $request->query($query)) {
+                    $this->errors[] = [
+                        '_value' => __('OaiXml::error.argument.missing', ['hint' => $query]),
                         '_attributes' => [
                             'code' => ErrorCodes::BadArgument->value,
                         ],
-                    ]);
+                    ];
                 }
             }
 
             $allowedQueries = Collection::wrap($verb->allowedQuery());
             foreach ($queries->keys() as $query) {
                 if (! $allowedQueries->contains($query)) {
-                    $errors->push([
-                        '_value' => "{$query} is a illegal parameter.",
+                    $this->errors[] = [
+                        '_value' => __('OaiXml::error.argument.illegal', ['hint' => $query]),
                         '_attributes' => [
                             'code' => ErrorCodes::BadArgument->value,
                         ],
-                    ]);
+                    ];
                 }
             }
         }
 
-        $this->errors = $errors->isNotEmpty() ? ['error' => $errors->toArray()] : [];
-
-        if ($errors->isEmpty()) {
-            $this->handleVerb($request);
-        }
-
-        return $errors->isNotEmpty();
+        return count($this->errors) >= 1;
     }
 
-    //----- Handle Verbs -----//
-    public function handleVerb(Request $request): void
+    public function ListRecords(Verb $verb, Request $request): array
     {
-        $verb = Verb::tryFrom($request->query(Verb::QUERY_VERB));
-
-        if (! $verb) {
-            return;
-        }
-
-        $getVerbRequiredQuery = Collection::wrap($verb->requiredQuery());
-
-        $this->requestAttributes = $getVerbRequiredQuery
-            ->mapWithKeys(fn ($item) => [$item => $request->query($item)])
-            ->toArray();
-
-        $this->handledVerb = method_exists($this, $verb->value) ? $this->{$verb->value}($verb) : [];
+        $records = new ListRecords($request, $this->conference);
+        return $records->getRecords();
     }
 
-    public function ListRecords(Verb $verb): array
-    {
-        $record = new ListRecords([
-            'identifier' => 'oai:localhost:8000:record/12345',
-            'datestamp' => now(),
-        ]);
-        return [
-            $verb->value => $record->getRecord(),
-        ];
-    }
-
-    // public function ListRecords(Verb $verb): array
-    // {
-    //     return [
-    //         $verb->value => [
-    //             'record' => [
-    //                 ...DublinCore::makeRecordHeader(
-    //                     'oai:localhost:8000:record/1',
-    //                     now(),
-    //                 ),
-    //                 'metadata' => [
-    //                     'oai_dc:dc' => [
-    //                         '_attributes' => DublinCore::getMetadataAttributes(),
-    //                         ...DCEnum::make('title', 'Ini Judul'),
-    //                     ],
-    //                 ],
-    //             ],
-    //         ],
-    //     ];
-    // }
-
-    public function ListMetadataFormats(Verb $verb): array
+    public function ListMetadataFormats(Verb $verb, Request $request): array
     {
         $dublinCore = DublinCore::getMetadataFormat();
-        return [
-            $verb->value = [
-                'metadataFormat' => $dublinCore,
-            ]
+
+        $metadataFormat = [];
+
+        $metadataFormat[] = [
+            'metadataFormat' => $dublinCore,
         ];
+
+        return $metadataFormat;
     }
 }

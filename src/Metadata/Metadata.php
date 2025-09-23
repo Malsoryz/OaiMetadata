@@ -35,9 +35,4 @@ abstract class Metadata
             ],
         ];
     }
-
-    // public static function makeRecord(): array
-    // {
-
-    // }
 }

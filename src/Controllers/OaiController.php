@@ -5,7 +5,6 @@ namespace Malsoryz\OaiXml\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Conference;
 
-use Malsoryz\OaiXml\Classes\OAI;
 use Malsoryz\OaiXml\Classes\OaiXml;
 
 class OaiController extends Controller
