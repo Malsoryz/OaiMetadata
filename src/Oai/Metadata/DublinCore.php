@@ -5,7 +5,9 @@ namespace Malsoryz\OaiXml\Oai\Metadata;
 use App\Models\Submission;
 use Malsoryz\OaiXml\Oai\Identifier\Granularity;
 
-enum DublinCore: string 
+use Malsoryz\OaiXml\Concerns\Oai\HasMetadata;
+
+enum DublinCore: string implements HasMetadata
 {
     case Title = 'title';
     case Creator = 'creator';
@@ -123,32 +125,5 @@ enum DublinCore: string
         $record[$metadataRootElement]['_attributes'] = self::getMetadataAttributes();
 
         return $record;
-
-        // $this->record = [
-        //     'header' => [
-        //         'identifier' => $this->createIdentifier($paper->id),
-        //         'datestamp' => Granularity::Second->format($paper->updated_at),
-        //     ],
-        //     'metadata' => EnumMetadata::from($metadata)->serialize([
-                // 'title' => $paper->getLocalizedMeta('title'),
-                // 'date' => Granularity::Second->format($paper->published_at),
-                // 'creator' => $paper->authors->pluck('fullname')->toArray(),
-                // 'identifier' => [
-                //     route('livewirePageGroup.conference.pages.paper', [
-                //         'conference' => $paper->conference,
-                //         'submission' => $paper->id,
-                //     ]),
-                //     $paper->doi?->doi,
-                // ],
-                // 'subject' => $paper->getMeta('keywords'),
-                // 'source' => $paper->proceeding->seriesTitle(),
-                // 'description' => $paper->getLocalizedMeta('abstract'),
-                // 'relation' => route('livewirePageGroup.conference.pages.paper', [
-                //     'conference' => $paper->conference,
-                //     'submission' => $paper->id,
-                // ]),
-                // 'language' => 'eng',
-        //     ]),
-        // ];
     }
 }

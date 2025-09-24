@@ -2,6 +2,13 @@
 
 namespace Malsoryz\OaiXml\Oai\Query;
 
+use Malsoryz\OaiXml\Oai\Query\verb\Identify;
+use Malsoryz\OaiXml\Oai\Query\Verb\GetRecord;
+use Malsoryz\OaiXml\Oai\Query\verb\ListRecords;
+use Malsoryz\OaiXml\Oai\Query\verb\ListSets;
+use Malsoryz\OaiXml\Oai\Query\verb\ListMetadataFormats;
+use Malsoryz\OaiXml\Oai\Query\verb\ListIdentifiers;
+
 enum Verb: string 
 {
     case Identify = 'Identify';
@@ -19,6 +26,18 @@ enum Verb: string
     public const QUERY_FROM = 'from';
     public const QUERY_UNTIL = 'until';
     public const QUERY_SET = 'set';
+
+    public function getClass(): string
+    {
+        return match ($this) {
+            self::Identify => Identify::class,
+            self::GetRecord => GetRecord::class,
+            self::ListRecords => ListRecords::class,
+            self::ListSets => ListSets::class,
+            self::ListMetadataFormats => ListMetadataFormats::class,
+            self::ListIdentifiers => ListIdentifiers::class,
+        };
+    }
 
     public function requiredQuery(): array
     {

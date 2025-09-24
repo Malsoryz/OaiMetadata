@@ -12,7 +12,9 @@ use Illuminate\Database\Eloquent\Collection;
 use Malsoryz\OaiXml\Oai\Metadata\Metadata as EnumMetadata;
 use Malsoryz\OaiXml\Oai\Query\Verb\GetRecord;
 
-class ListRecords
+use Malsoryz\OaiXml\Concerns\Oai\HasVerbAction;
+
+class ListRecords implements HasVerbAction
 {
     protected Request $request;
     protected Collection $submissions;

@@ -10,7 +10,9 @@ use Malsoryz\OaiXml\Oai\Metadata\Metadata as EnumMetadata;
 use Malsoryz\OaiXml\Oai\Identifier\Granularity;
 use Malsoryz\OaiXml\Oai\Query\Verb;
 
-class GetRecord
+use Malsoryz\OaiXml\Concerns\Oai\HasVerbAction;
+
+class GetRecord implements HasVerbAction
 {
     protected array $record = [];
     protected string $urlHost;

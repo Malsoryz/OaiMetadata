@@ -13,7 +13,7 @@ use Malsoryz\OaiXml\Oai\Query\Verb;
 use Malsoryz\OaiXml\Oai\Metadata\Metadata;
 use Spatie\ArrayToXml\ArrayToXml as Xml;
 
-class OaiXml extends Xml
+class OaiXml
 {
     protected Conference $conference;
     protected Xml $xml;
@@ -46,7 +46,28 @@ class OaiXml extends Xml
             options: $options
         );
 
-        $this->xml->addProcessingInstruction('xml-stylesheet', 'type="text/xsl" href="' . asset('plugin/oaixml/lib/xsl/oai2.xsl') . '"');
+        $this->addPI($this->getPI());
+    }
+
+    public function addPI(array $instruction): void
+    {
+        foreach ($instruction as $name => $attributes) {
+            $pi = array_map(function ($attr, $value) {
+                return "{$attr}=\"{$value}\"";
+            }, array_keys($attributes), $attributes);
+
+            $this->xml->addProcessingInstruction($name, implode(' ', $pi));
+        }
+    }
+
+    public function getPI(): array
+    {
+        return [
+            'xml-stylesheet' => [
+                'type' => 'text/xsl',
+                'href' => asset('plugin/oaixml/lib/xsl/oai2.xsl'),
+            ],
+        ];
     }
 
     public function getXml()
