@@ -1,6 +1,6 @@
 <?php
 
-namespace Malsoryz\OaiXml\Classes\OaiXml;
+namespace Malsoryz\OaiXml\Oai\Query\Verb;
 
 use App\Models\Conference;
 use App\Models\Enums\SubmissionStatus;
@@ -8,11 +8,9 @@ use App\Models\Enums\SubmissionStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Collection;
-use InvalidArgumentException;
-use Malsoryz\OaiXml\Metadata\Metadata;
-use Malsoryz\OaiXml\Enums\Metadata as EnumMetadata;
 
-use Malsoryz\OaiXml\Classes\OaiXml\GetRecord;
+use Malsoryz\OaiXml\Oai\Metadata\Metadata as EnumMetadata;
+use Malsoryz\OaiXml\Oai\Query\Verb\GetRecord;
 
 class ListRecords
 {

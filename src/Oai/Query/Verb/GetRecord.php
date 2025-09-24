@@ -1,14 +1,14 @@
 <?php
 
-namespace Malsoryz\OaiXml\Classes\OaiXml;
+namespace Malsoryz\OaiXml\Oai\Query\Verb;
 
 use App\Models\Submission;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Http\Request;
-use Malsoryz\OaiXml\Enums\Metadata as EnumMetadata;
-use Malsoryz\OaiXml\Enums\Granularity;
-use Malsoryz\OaiXml\Enums\Verb;
+use Malsoryz\OaiXml\Oai\Metadata\Metadata as EnumMetadata;
+use Malsoryz\OaiXml\Oai\Identifier\Granularity;
+use Malsoryz\OaiXml\Oai\Query\Verb;
 
 class GetRecord
 {

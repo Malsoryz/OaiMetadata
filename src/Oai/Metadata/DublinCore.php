@@ -1,9 +1,9 @@
 <?php
 
-namespace Malsoryz\OaiXml\Enums\Metadata;
+namespace Malsoryz\OaiXml\Oai\Metadata;
 
 use App\Models\Submission;
-use Malsoryz\OaiXml\Enums\Granularity;
+use Malsoryz\OaiXml\Oai\Identifier\Granularity;
 
 enum DublinCore: string 
 {

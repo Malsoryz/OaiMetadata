@@ -1,6 +1,6 @@
 <?php
 
-namespace Malsoryz\OaiXml\Enums;
+namespace Malsoryz\OaiXml\Oai\Query;
 
 enum Verb: string 
 {
