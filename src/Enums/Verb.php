@@ -38,7 +38,6 @@ enum Verb: string
             self::ListSets, self::ListMetadataFormats => [
                 self::QUERY_VERB,
             ],
-            default => [],
         };
     }
 
@@ -70,7 +69,6 @@ enum Verb: string
                 self::QUERY_RESUMPTION_TOKEN,
                 self::QUERY_IDENTIFIER,
             ],
-            default => [],
         };
     }
 }

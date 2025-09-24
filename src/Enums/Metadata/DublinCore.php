@@ -2,6 +2,9 @@
 
 namespace Malsoryz\OaiXml\Enums\Metadata;
 
+use App\Models\Submission;
+use Malsoryz\OaiXml\Enums\Granularity;
+
 enum DublinCore: string 
 {
     case Title = 'title';
@@ -20,7 +23,10 @@ enum DublinCore: string
     case Coverage = 'coverage';
     case Rights = 'rights';
 
-    public const PREFIX = 'dc';
+    public const METADATA_PREFIX = 'oai_dc';
+    public const ELEMENT_PREFIX = 'dc';
+    public const SCHEMA_LOCATION = 'http://www.openarchives.org/OAI/2.0/oai_dc.xsd';
+    public const METADATA_NAMESPACE = 'http://www.openarchives.org/OAI/2.0/oai_dc/';
 
     public static function make(DublinCore|string $element, array|string $values): array
     {
@@ -29,13 +35,32 @@ enum DublinCore: string
         $data = [];
 
         if (is_array($values)) {
-            foreach ($values as $value) {
+            foreach (array_filter($values, fn ($item) => ! is_null($item)) as $value) {
                 $data[]['_value'] = $value;
             }
-            return [self::PREFIX.':'.$dcElement->value, $data];
+            return [self::ELEMENT_PREFIX.':'.$dcElement->value, $data];
         }
 
-        return [self::PREFIX.':'.$dcElement->value, $values];
+        return [self::ELEMENT_PREFIX.':'.$dcElement->value, $values];
+    }
+
+    public static function getMetadataFormat(): array
+    {
+        return [
+            'metadataPrefix' => self::METADATA_PREFIX,
+            'schema' => self::SCHEMA_LOCATION,
+            'metadataNamespace' => self::METADATA_NAMESPACE,
+        ];
+    }
+
+    public static function getMetadataAttributes(): array
+    {
+        return [
+            'xmlns:' . self::METADATA_PREFIX => self::METADATA_NAMESPACE,
+            'xmlns:' . self::ELEMENT_PREFIX => 'http://purl.org/dc/elements/1.1/',
+            'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
+            'xsi:schemaLocation' => self::METADATA_NAMESPACE.' '.self::SCHEMA_LOCATION,
+        ];
     }
 
     public static function getElementOrder(): array
@@ -57,5 +82,73 @@ enum DublinCore: string
             self::Coverage->value,
             self::Rights->value,
         ];
+    }
+
+    public static function serialize(Submission $paper): array
+    {
+        $metadataRootElement = self::METADATA_PREFIX.':'.self::ELEMENT_PREFIX;
+
+        $data = [
+            'title' => $paper->getLocalizedMeta('title'),
+            'date' => Granularity::Second->format($paper->published_at),
+            'creator' => $paper->authors->pluck('fullname')->toArray(),
+            'identifier' => [
+                route('livewirePageGroup.conference.pages.paper', [
+                    'conference' => $paper->conference,
+                    'submission' => $paper->id,
+                ]),
+                $paper->doi?->doi,
+            ],
+            'subject' => $paper->getMeta('keywords'),
+            'source' => $paper->proceeding->seriesTitle(),
+            'description' => $paper->getLocalizedMeta('abstract'),
+            'relation' => route('livewirePageGroup.conference.pages.paper', [
+                'conference' => $paper->conference,
+                'submission' => $paper->id,
+            ]),
+            'language' => 'eng',
+        ];
+
+        $record = [];
+
+        $orders = static::getElementOrder();
+
+        foreach ($orders as $order) {
+            if (array_key_exists($order, $data)) {
+                [$name, $dataValue] = static::make($order, $data[$order]);
+                $record[$metadataRootElement][$name] = $dataValue;
+            }
+        }
+
+        $record[$metadataRootElement]['_attributes'] = self::getMetadataAttributes();
+
+        return $record;
+
+        // $this->record = [
+        //     'header' => [
+        //         'identifier' => $this->createIdentifier($paper->id),
+        //         'datestamp' => Granularity::Second->format($paper->updated_at),
+        //     ],
+        //     'metadata' => EnumMetadata::from($metadata)->serialize([
+                // 'title' => $paper->getLocalizedMeta('title'),
+                // 'date' => Granularity::Second->format($paper->published_at),
+                // 'creator' => $paper->authors->pluck('fullname')->toArray(),
+                // 'identifier' => [
+                //     route('livewirePageGroup.conference.pages.paper', [
+                //         'conference' => $paper->conference,
+                //         'submission' => $paper->id,
+                //     ]),
+                //     $paper->doi?->doi,
+                // ],
+                // 'subject' => $paper->getMeta('keywords'),
+                // 'source' => $paper->proceeding->seriesTitle(),
+                // 'description' => $paper->getLocalizedMeta('abstract'),
+                // 'relation' => route('livewirePageGroup.conference.pages.paper', [
+                //     'conference' => $paper->conference,
+                //     'submission' => $paper->id,
+                // ]),
+                // 'language' => 'eng',
+        //     ]),
+        // ];
     }
 }

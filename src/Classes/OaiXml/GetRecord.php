@@ -53,26 +53,7 @@ class GetRecord
                 'identifier' => $this->createIdentifier($this->paper->id),
                 'datestamp' => Granularity::Second->format($this->paper->updated_at),
             ],
-            'metadata' => EnumMetadata::from($metadata)->serialize([
-                'title' => $this->paper->getLocalizedMeta('title'),
-                'date' => Granularity::Second->format($this->paper->published_at),
-                'creator' => $this->paper->authors->pluck('fullname')->toArray(),
-                'identifier' => [
-                    route('livewirePageGroup.conference.pages.paper', [
-                        'conference' => $this->paper->conference,
-                        'submission' => $this->paper->id,
-                    ]),
-                    $this->paper->doi?->doi,
-                ],
-                'subject' => $this->paper->getMeta('keywords'),
-                'source' => $this->paper->proceeding->seriesTitle(),
-                'description' => $this->paper->getLocalizedMeta('abstract'),
-                'relation' => route('livewirePageGroup.conference.pages.paper', [
-                    'conference' => $this->paper->conference,
-                    'submission' => $this->paper->id,
-                ]),
-                'language' => 'eng',
-            ]),
+            'metadata' => EnumMetadata::from($metadata)->serialize($this->paper),
         ];
     }
 

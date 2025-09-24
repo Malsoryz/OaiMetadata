@@ -10,7 +10,7 @@ use Malsoryz\OaiXml\Classes\OaiXml\ListRecords;
 use Malsoryz\OaiXml\Enums\ErrorCodes;
 use Malsoryz\OaiXml\Enums\Metadata\DublinCore as DCEnum;
 use Malsoryz\OaiXml\Enums\Verb;
-use Malsoryz\OaiXml\Metadata\DublinCore;
+use Malsoryz\OaiXml\Enums\Metadata;
 use Spatie\ArrayToXml\ArrayToXml as Xml;
 
 class OaiXml extends Xml
@@ -134,9 +134,9 @@ class OaiXml extends Xml
             ];
         } else {
             // jika verb illegal
-            if (! Verb::tryFrom($queries->get(Verb::QUERY_VERB)) && $queries->get(Verb::QUERY_VERB) !== ErrorCodes::REPEATED_ARGUMENT) {
+            if (! Verb::tryFrom($request->query(Verb::QUERY_VERB)) && $request->query(Verb::QUERY_VERB) !== ErrorCodes::REPEATED_ARGUMENT) {
                 $this->errors[] = [
-                    '_value' => __('OaiXml::error.verb.illegal', ['hint' => $queries->get(Verb::QUERY_VERB)]),
+                    '_value' => __('OaiXml::error.verb.illegal', ['hint' => $request->query(Verb::QUERY_VERB)]),
                     '_attributes' => [
                         'code' => ErrorCodes::BadVerb->value,
                     ],
@@ -193,14 +193,6 @@ class OaiXml extends Xml
 
     public function ListMetadataFormats(Verb $verb, Request $request): array
     {
-        $dublinCore = DublinCore::getMetadataFormat();
-
-        $metadataFormat = [];
-
-        $metadataFormat[] = [
-            'metadataFormat' => $dublinCore,
-        ];
-
-        return $metadataFormat;
+        return Metadata::getListMetadata();
     }
 }
