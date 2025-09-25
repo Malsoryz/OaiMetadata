@@ -20,7 +20,7 @@ class ErrorCodes
     public const REPEATED_ARGUMENT = '$2y$10$zPnmsan2nIDN7IJ6BTH4Deg3ZcUgDrxXzHjP315qxZgE53/aQ16Ca';
     public const MISSING_ARGUMENT = null;
 
-    public static function check(Request $request): ?array
+    public static function check(Request $request): array|Verb
     {
         $errors = [];
 
@@ -83,7 +83,7 @@ class ErrorCodes
             }
         }
 
-        return count($errors) >= 1 ? $errors : null;
+        return count($errors) >= 1 ? $errors : Verb::from($request->query('verb'));
     }
 
     // hanya untuk mengecek argument jika didefinisikan dua kali

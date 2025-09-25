@@ -2,12 +2,12 @@
 
 namespace Malsoryz\OaiXml\Oai\Query;
 
-use Malsoryz\OaiXml\Oai\Query\verb\Identify;
+use Malsoryz\OaiXml\Oai\Query\Verb\Identify;
 use Malsoryz\OaiXml\Oai\Query\Verb\GetRecord;
-use Malsoryz\OaiXml\Oai\Query\verb\ListRecords;
-use Malsoryz\OaiXml\Oai\Query\verb\ListSets;
-use Malsoryz\OaiXml\Oai\Query\verb\ListMetadataFormats;
-use Malsoryz\OaiXml\Oai\Query\verb\ListIdentifiers;
+use Malsoryz\OaiXml\Oai\Query\Verb\ListRecords;
+use Malsoryz\OaiXml\Oai\Query\Verb\ListSets;
+use Malsoryz\OaiXml\Oai\Query\Verb\ListMetadataFormats;
+use Malsoryz\OaiXml\Oai\Query\Verb\ListIdentifiers;
 
 enum Verb: string 
 {

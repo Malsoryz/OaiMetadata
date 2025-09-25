@@ -13,30 +13,51 @@ use Malsoryz\OaiXml\Oai\Query\Verb;
 use Malsoryz\OaiXml\Oai\Metadata\Metadata;
 use Spatie\ArrayToXml\ArrayToXml as Xml;
 
+use DOMDocument;
+
 class OaiXml
 {
+    protected Request $request;
     protected Conference $conference;
+    protected Carbon $responseDate;
+
+    protected array $processingInstruction = [];
+    protected array $rootElement = [];
+    protected array $handledVerb = [];
+
     protected Xml $xml;
     protected array $errors = [];
     protected array $requestAttributes = [];
-    protected array $handledVerb = [];
 
     public function __construct(
         Request $request,
         Conference $conference,
-        Carbon $responseDate,
+    )
+    {
+        $this->conference = $conference;
+        $this->request = $request;
+
+        $this->rootElement = $this->rootElement();
+    }
+
+    public function convert(
         bool $replaceSpacesByUnderScoresInKeyNames = true,
         array $domProperties = ['formatOutput' => true],
         bool | null $xmlStandalone = null,
         bool $addXmlDeclaration = true,
         array | null $options = ['convertNullToXsiNil' => false, 'convertBoolToString' => false]
-    )
+    ): DOMDocument
     {
-        $this->conference = $conference;
-
-        $this->xml = new Xml(
-            array: $this->handleResponse($request, $responseDate),
-            rootElement: $this->rootElement(),
+        $xml = new Xml(
+            array: [
+                'responseDate' => $this->responseDate->format('Y-m-d\TH:i:s\Z'),
+                'request' => [
+                    '_value' => $this->request->url(),
+                    '_attributes' => $this->requestAttributes
+                ],
+                ...(count($this->errors) >= 1 ? ['error' => $this->errors] : $this->handledVerb),
+            ],
+            rootElement: $this->rootElement,
             replaceSpacesByUnderScoresInKeyNames: $replaceSpacesByUnderScoresInKeyNames,
             xmlEncoding: 'UTF-8',
             xmlVersion: '1.0',
@@ -46,18 +67,48 @@ class OaiXml
             options: $options
         );
 
-        $this->addPI($this->getPI());
+        $this->addPI($this->processingInstruction);
+
+        foreach ($this->processingInstruction as $name => $attrs) {
+            $xml->addProcessingInstruction($name, $attrs);
+        }
+
+        return $xml->toDom();
     }
 
-    public function addPI(array $instruction): void
+    public function handle(Carbon $responseDate): static
+    {
+        $this->responseDate = $responseDate;
+
+        $response = ErrorCodes::check($this->request);
+
+        if ($response instanceof Verb) {
+            $getResponse = $response->getClass()::handleVerb($this->request);
+            $this->handledVerb = $getResponse->handledVerb;
+            $this->requestAttributes = $getResponse->requestAttributes;
+        } else {
+            $this->errors = $response;
+        }
+
+        return $this;
+    }
+
+    public function addPI(array $instruction): static
     {
         foreach ($instruction as $name => $attributes) {
-            $pi = array_map(function ($attr, $value) {
-                return "{$attr}=\"{$value}\"";
-            }, array_keys($attributes), $attributes);
+            if (!is_array($attributes)) {
+                continue;
+            }
 
-            $this->xml->addProcessingInstruction($name, implode(' ', $pi));
+            $pi = [];
+            foreach ($attributes as $attr => $value) {
+                $pi[] = "{$attr}=\"{$value}\"";
+            }
+
+            $this->processingInstruction[$name] = implode(' ', $pi);
         }
+
+        return $this;
     }
 
     public function getPI(): array
@@ -86,6 +137,9 @@ class OaiXml
             ],
         ];
     }
+
+    ////////////////////////////////////////////////////////////
+    ////////////////////////////// unused //////////////////////
 
     public function handleResponse(Request $request, Carbon $responseDate): array
     {
