@@ -9,11 +9,14 @@ use Malsoryz\OaiXml\Oai\Response as VerbResponse;
 use Malsoryz\OaiXml\Oai\Query\Verb;
 use Malsoryz\OaiXml\Oai\OaiXml;
 
+use Malsoryz\OaiXml\Oai\Metadata\Metadata;
+
 class ListMetadataFormats implements HasVerbAction
 {
-    public static function handleVerb(Request $request, OaiXml $oaixml): OaiXml
+    public static function handleVerb(OaiXml $oaixml): OaiXml
     {
-        $verb = Verb::ListMetadataFormats;
+        $request = $oaixml->getRequest();
+        $verb = $oaixml->getCurrentVerb();
         $getAllowedQuery = $verb->allowedQuery();
 
         $attributes = [];
@@ -23,8 +26,10 @@ class ListMetadataFormats implements HasVerbAction
             }
         }
 
-        return new VerbResponse([
-            $verb->value => [],
-        ], $attributes);
+        $lists = [$verb->value => Metadata::getListMetadata()];
+
+        return $oaixml
+            ->setRequestAttributes($attributes)
+            ->setHandledVerb($lists);
     }
 }

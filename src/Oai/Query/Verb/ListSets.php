@@ -9,11 +9,16 @@ use Malsoryz\OaiXml\Oai\Response as VerbResponse;
 use Malsoryz\OaiXml\Oai\Query\Verb;
 use Malsoryz\OaiXml\Oai\OaiXml;
 
+use Malsoryz\OaiXml\Oai\Sets;
+
+use Malsoryz\OaiXml\Oai\Query\ErrorCodes;
+
 class ListSets implements HasVerbAction
 {
-    public static function handleVerb(Request $request, OaiXml $oaixml): OaiXml
+    public static function handleVerb(OaiXml $oaixml): OaiXml
     {
-        $verb = Verb::ListSets;
+        $request = $oaixml->getRequest();
+        $verb = $oaixml->getCurrentVerb();
         $getAllowedQuery = $verb->allowedQuery();
 
         $attributes = [];
@@ -23,8 +28,27 @@ class ListSets implements HasVerbAction
             }
         }
 
-        return new VerbResponse([
-            $verb->value => [],
-        ], $attributes);
+        $listSets = Sets::getListSets();
+
+        $response = [];
+
+        if (! count($listSets) >= 1) {
+            $response = [
+                'error' => [
+                    '_value' => __('OaiXml::error.sets.missing'),
+                    '_attributes' => [
+                        'code' => ErrorCodes::NO_SET_HIERARCHY,
+                    ],
+                ],
+            ];
+        } else {
+            foreach ($listSets as $set) {
+                $response['set'][] = $set;
+            }
+        }
+
+        return $oaixml
+            ->setRequestAttributes($attributes)
+            ->setHandledVerb([$verb->value => $response]);
     }
 }

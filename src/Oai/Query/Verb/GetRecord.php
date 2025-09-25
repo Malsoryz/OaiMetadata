@@ -58,50 +58,13 @@ class GetRecord implements HasVerbAction
                 'identifier' => $this->createIdentifier($this->paper->id),
                 'datestamp' => Granularity::Second->format($this->paper->updated_at),
             ],
-            'metadata' => EnumMetadata::from($metadata)->serialize($this->paper),
+            'metadata' => EnumMetadata::from($metadata)->getClass()::serialize($this->paper),
         ];
     }
 
-    public static function handleVerb(Request $request, OaiXml $oaixml): OaiXml
+        public function getRecord(): array
     {
-        $verb = Verb::GetRecord;
-        $getAllowedQuery = $verb->allowedQuery();
-
-        $urlHost = parse_url($request->url(), PHP_URL_HOST);
-
-        $getSubmissionId = self::matchTemplate('oai:'.$urlHost.':'.self::IDENTIFIER_PREFIX.'/{id}', $request->query(verb::QUERY_IDENTIFIER));
-
-        // dd($getSubmissionId, 'oai:'.$urlHost.':'.self::IDENTIFIER_PREFIX.'/{id}', $request->query(verb::QUERY_IDENTIFIER));
-
-        $getID = (int) $getSubmissionId['id'];
-        
-        $attributes = [];
-        foreach ($getAllowedQuery as $query) {
-            if (array_key_exists($query, $request->query())) {
-                $attributes[$query] = $request->query($query);
-            }
-        }
-
-        if (! is_int($getID)) {
-            throw new \Exception("ID is not valid");
-        }
-
-        $getRecord = new GetRecord((int) $getID, $request);
-
-        $response = [
-            $verb->value => $getRecord->getRecord(),
-        ];
-
-        $newOai = $oaixml;
-        $newOai->setRequestAttributes($attributes);
-        $newOai->setHandledVerb($response);
-
-        return $newOai;
-    }
-
-    public function getRecord(): array
-    {
-        return ['record' => $this->record];
+        return $this->record;
     }
 
     public function createIdentifier(int|string $id): string
@@ -141,5 +104,44 @@ class GetRecord implements HasVerbAction
         }
 
         return null;
+    }
+
+    //////////////////////////////////////////////////////////
+
+    public static function handleVerb(OaiXml $origin): OaiXml
+    {
+        $verb = $origin->getCurrentVerb();
+        $request = $origin->getRequest();
+
+        $getAllowedQuery = $verb->allowedQuery();
+
+        $urlHost = parse_url($request->url(), PHP_URL_HOST);
+
+        $getSubmissionId = self::matchTemplate('oai:'.$urlHost.':'.self::IDENTIFIER_PREFIX.'/{id}', $request->query(verb::QUERY_IDENTIFIER));
+
+        $getID = (int) $getSubmissionId['id'];
+        
+        $attributes = [];
+        foreach ($getAllowedQuery as $query) {
+            if (array_key_exists($query, $request->query())) {
+                $attributes[$query] = $request->query($query);
+            }
+        }
+
+        if (! is_int($getID)) {
+            throw new \Exception("ID is not valid");
+        }
+
+        $getRecord = new GetRecord($getID, $request);
+
+        $newOai = $origin;
+        $newOai->setRequestAttributes($attributes)
+            ->setHandledVerb([
+                $verb->value => [
+                    'record' => $getRecord->getRecord()
+                ],
+            ]);
+
+        return $newOai;
     }
 }

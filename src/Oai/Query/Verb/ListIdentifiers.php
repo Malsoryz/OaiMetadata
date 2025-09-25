@@ -2,18 +2,25 @@
 
 namespace Malsoryz\OaiXml\Oai\Query\verb;
 
+use App\Models\Enums\SubmissionStatus;
 use Malsoryz\OaiXml\Concerns\Oai\HasVerbAction;
 
 use Illuminate\Http\Request;
 use Malsoryz\OaiXml\Oai\Response as VerbResponse;
 use Malsoryz\OaiXml\Oai\Query\Verb;
+use Malsoryz\OaiXml\Oai\Query\Verb\GetRecord;
 use Malsoryz\OaiXml\Oai\OaiXml;
 
 class ListIdentifiers implements HasVerbAction
 {
-    public static function handleVerb(Request $request, OaiXml $oaixml): OaiXml
+    public static function handleVerb(OaiXml $oaixml): OaiXml
     {
-        $verb = Verb::ListIdentifiers;
+        $submissions = $oaixml->getConference()
+            ->submission()
+            ->where('status', SubmissionStatus::Published)->get();
+
+        $request = $oaixml->getRequest();
+        $verb = $oaixml->getCurrentVerb();
         $getAllowedQuery = $verb->allowedQuery();
 
         $attributes = [];
@@ -23,8 +30,17 @@ class ListIdentifiers implements HasVerbAction
             }
         }
 
-        return new VerbResponse([
-            $verb->value => [],
-        ], $attributes);
+        $records = [];
+
+        foreach ($submissions as $paper) {
+            $newRecord = new GetRecord($paper, $request);
+            $records[] = $newRecord->getRecord()['header'];
+        }
+
+        return $oaixml
+            ->setRequestAttributes($attributes)
+            ->setHandledVerb([$verb->value => [
+                'header' => $records,
+            ]]);
     }
 }

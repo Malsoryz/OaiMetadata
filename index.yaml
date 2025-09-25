@@ -1,7 +1,7 @@
-name: OAI-XML
-folder: OaiXml
-author: Malsoryz
-description: 'Leconfe OAI Metadata Plugin'
+name: OaiMetadata
+folder: OaiMetadata
+author: Leconfe
+description: 'OAI Metadata Plugin'
 version: 1.0.0
 targets: 
   - conference

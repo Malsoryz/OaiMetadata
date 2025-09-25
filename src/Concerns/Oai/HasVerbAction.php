@@ -9,5 +9,5 @@ use Illuminate\Http\Request;
 
 interface HasVerbAction
 {
-    public static function handleVerb(Request $request, OaiXml $oaixml): OaiXml;
+    public static function handleVerb(OaiXml $origin): OaiXml;
 }

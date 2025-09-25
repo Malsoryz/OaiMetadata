@@ -11,10 +11,13 @@ use Malsoryz\OaiXml\Oai\OaiXml;
 
 class Identify implements HasVerbAction
 {
-    public static function handleVerb(Request $request, OaiXml $oaixml): OaiXml
+    public static function handleVerb(OaiXml $oaixml): OaiXml
     {
-        $verb = Verb::Identify;
+        $request = $oaixml->getRequest();
+        $verb = $oaixml->getCurrentVerb();
         $getAllowedQuery = $verb->allowedQuery();
+
+        $repository = $oaixml->getRepository();
 
         $attributes = [];
         foreach ($getAllowedQuery as $query) {
@@ -23,8 +26,10 @@ class Identify implements HasVerbAction
             }
         }
 
-        return new VerbResponse([
-            Verb::Identify->value => [],
-        ], $attributes);
+        // dd($repository);
+
+        return $oaixml
+            ->setRequestAttributes($attributes)
+            ->setHandledVerb([$verb->value => $repository->getRepositoryInfo()]);
     }
 }

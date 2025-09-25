@@ -8,17 +8,11 @@ use App\Models\Enums\SubmissionStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Collection;
-
-use Malsoryz\OaiXml\Oai\Metadata\Metadata as EnumMetadata;
-use Malsoryz\OaiXml\Oai\Query\Verb\GetRecord;
-
-use Malsoryz\OaiXml\Concerns\Oai\HasVerbAction;
-
-use Malsoryz\OaiXml\Oai\Response as VerbResponse;
-
-use Malsoryz\OaiXml\Oai\Query\Verb;
-
 use Malsoryz\OaiXml\Oai\OaiXml;
+use Malsoryz\OaiXml\Oai\Query\Verb;
+use Malsoryz\OaiXml\Oai\Query\Verb\GetRecord;
+use Malsoryz\OaiXml\Oai\Metadata\Metadata as EnumMetadata;
+use Malsoryz\OaiXml\Concerns\Oai\HasVerbAction;
 
 class ListRecords implements HasVerbAction
 {
@@ -49,9 +43,14 @@ class ListRecords implements HasVerbAction
         return $records;
     }
 
-    public static function handleVerb(Request $request, OaiXml $oaixml): OaiXml
+    public static function handleVerb(OaiXml $oaixml): OaiXml
     {
-        $verb = Verb::ListRecords;
+        $submissions = $oaixml->getConference()
+            ->submission()
+            ->where('status', SubmissionStatus::Published)->get();
+
+        $request = $oaixml->getRequest();
+        $verb = $oaixml->getCurrentVerb();
         $getAllowedQuery = $verb->allowedQuery();
 
         $attributes = [];
@@ -61,8 +60,18 @@ class ListRecords implements HasVerbAction
             }
         }
 
-        return new VerbResponse([
-            $verb->value => [],
-        ], $attributes);
+        $records = [];
+
+        foreach ($submissions as $paper) {
+            $newRecord = new GetRecord($paper, $request);
+            $records[] = $newRecord->getRecord();
+        }
+
+        $oaixml->setRequestAttributes($attributes)
+            ->setHandledVerb([$verb->value => [
+                'record' => $records,
+            ]]);
+
+        return $oaixml;
     }
 }

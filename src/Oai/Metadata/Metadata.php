@@ -16,11 +16,6 @@ enum Metadata: string
         };
     }
 
-    public function serialize(Submission $paper): array
-    {
-        return $this->getClass()::serialize($paper);
-    }
-
     public static function getListMetadata(): array
     {
         return [
