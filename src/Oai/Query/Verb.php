@@ -1,6 +1,13 @@
 <?php
 
-namespace Malsoryz\OaiXml\Enums;
+namespace Malsoryz\OaiXml\Oai\Query;
+
+use Malsoryz\OaiXml\Oai\Query\Verb\Identify;
+use Malsoryz\OaiXml\Oai\Query\Verb\GetRecord;
+use Malsoryz\OaiXml\Oai\Query\Verb\ListRecords;
+use Malsoryz\OaiXml\Oai\Query\Verb\ListSets;
+use Malsoryz\OaiXml\Oai\Query\Verb\ListMetadataFormats;
+use Malsoryz\OaiXml\Oai\Query\Verb\ListIdentifiers;
 
 enum Verb: string 
 {
@@ -19,6 +26,18 @@ enum Verb: string
     public const QUERY_FROM = 'from';
     public const QUERY_UNTIL = 'until';
     public const QUERY_SET = 'set';
+
+    public function getClass(): string
+    {
+        return match ($this) {
+            self::Identify => Identify::class,
+            self::GetRecord => GetRecord::class,
+            self::ListRecords => ListRecords::class,
+            self::ListSets => ListSets::class,
+            self::ListMetadataFormats => ListMetadataFormats::class,
+            self::ListIdentifiers => ListIdentifiers::class,
+        };
+    }
 
     public function requiredQuery(): array
     {

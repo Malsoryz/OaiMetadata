@@ -1,6 +1,6 @@
 <?php
 
-namespace Malsoryz\OaiXml\Classes\OaiXml;
+namespace Malsoryz\OaiXml\Oai\Query\Verb;
 
 use App\Models\Conference;
 use App\Models\Enums\SubmissionStatus;
@@ -8,13 +8,17 @@ use App\Models\Enums\SubmissionStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Collection;
-use InvalidArgumentException;
-use Malsoryz\OaiXml\Metadata\Metadata;
-use Malsoryz\OaiXml\Enums\Metadata as EnumMetadata;
 
-use Malsoryz\OaiXml\Classes\OaiXml\GetRecord;
+use Malsoryz\OaiXml\Oai\Metadata\Metadata as EnumMetadata;
+use Malsoryz\OaiXml\Oai\Query\Verb\GetRecord;
 
-class ListRecords
+use Malsoryz\OaiXml\Concerns\Oai\HasVerbAction;
+
+use Malsoryz\OaiXml\Oai\Response as VerbResponse;
+
+use Malsoryz\OaiXml\Oai\Query\Verb;
+
+class ListRecords implements HasVerbAction
 {
     protected Request $request;
     protected Collection $submissions;
@@ -41,5 +45,22 @@ class ListRecords
         }
 
         return $records;
+    }
+
+    public static function handleVerb(Request $request): VerbResponse
+    {
+        $verb = Verb::ListRecords;
+        $getAllowedQuery = $verb->allowedQuery();
+
+        $attributes = [];
+        foreach ($getAllowedQuery as $query) {
+            if (array_key_exists($query, $request->query())) {
+                $attributes[$query] = $request->query($query);
+            }
+        }
+
+        return new VerbResponse([
+            $verb->value => [],
+        ], $attributes);
     }
 }

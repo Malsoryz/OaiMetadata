@@ -1,6 +1,6 @@
 <?php
 
-namespace Malsoryz\OaiXml\Enums;
+namespace Malsoryz\OaiXml\Oai\Identifier;
 
 use Illuminate\Support\Carbon;
 

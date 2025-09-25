@@ -1,9 +1,9 @@
 <?php
 
-namespace Malsoryz\OaiXml\Enums;
+namespace Malsoryz\OaiXml\Oai\Metadata;
 
 use App\Models\Submission;
-use Malsoryz\OaiXml\Enums\Metadata\DublinCore;
+use Malsoryz\OaiXml\Oai\Metadata\DublinCore;
 
 enum Metadata: string 
 {
@@ -18,9 +18,7 @@ enum Metadata: string
 
     public function serialize(Submission $paper): array
     {
-        return match ($this) {
-            self::DublinCore => DublinCore::serialize($paper),
-        };
+        return $this->getClass()::serialize($paper);
     }
 
     public static function getListMetadata(): array
