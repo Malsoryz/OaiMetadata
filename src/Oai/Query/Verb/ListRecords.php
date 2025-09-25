@@ -14,6 +14,10 @@ use Malsoryz\OaiXml\Oai\Query\Verb\GetRecord;
 
 use Malsoryz\OaiXml\Concerns\Oai\HasVerbAction;
 
+use Malsoryz\OaiXml\Oai\Response as VerbResponse;
+
+use Malsoryz\OaiXml\Oai\Query\Verb;
+
 class ListRecords implements HasVerbAction
 {
     protected Request $request;
@@ -41,5 +45,22 @@ class ListRecords implements HasVerbAction
         }
 
         return $records;
+    }
+
+    public static function handleVerb(Request $request): VerbResponse
+    {
+        $verb = Verb::ListRecords;
+        $getAllowedQuery = $verb->allowedQuery();
+
+        $attributes = [];
+        foreach ($getAllowedQuery as $query) {
+            if (array_key_exists($query, $request->query())) {
+                $attributes[$query] = $request->query($query);
+            }
+        }
+
+        return new VerbResponse([
+            $verb->value => [],
+        ], $attributes);
     }
 }
