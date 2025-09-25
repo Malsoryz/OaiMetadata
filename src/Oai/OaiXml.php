@@ -1,17 +1,17 @@
 <?php
 
-namespace Malsoryz\OaiXml\Oai;
+namespace Leconfe\OaiMetadata\Oai;
 
 use App\Models\Conference;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Http\Request;
-use Malsoryz\OaiXml\Oai\Query\Verb\ListRecords;
-use Malsoryz\OaiXml\Oai\Query\ErrorCodes;
-use Malsoryz\OaiXml\Oai\Metadata\DublinCore as DCEnum;
-use Malsoryz\OaiXml\Oai\Query\Verb;
-use Malsoryz\OaiXml\Oai\Metadata\Metadata;
-use Malsoryz\OaiXml\Oai\Repository;
+use Leconfe\OaiMetadata\Oai\Query\Verb\ListRecords;
+use Leconfe\OaiMetadata\Oai\Query\ErrorCodes;
+use Leconfe\OaiMetadata\Oai\Metadata\DublinCore as DCEnum;
+use Leconfe\OaiMetadata\Oai\Query\Verb;
+use Leconfe\OaiMetadata\Oai\Metadata\Metadata;
+use Leconfe\OaiMetadata\Oai\Repository;
 use Spatie\ArrayToXml\ArrayToXml as Xml;
 
 use DOMDocument;

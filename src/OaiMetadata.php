@@ -1,6 +1,6 @@
 <?php
 
-namespace Malsoryz\OaiXml;
+namespace Leconfe\OaiMetadata;
 
 use App\Models\Conference;
 use App\Classes\Plugin;
@@ -10,12 +10,12 @@ use Illuminate\Translation\Translator;
 use Illuminate\Http\Request;
 use Symfony\Component\Yaml\Yaml;
 
-use Malsoryz\OaiXml\Oai\OaiXml as Xml;
-use Malsoryz\OaiXml\Oai\Repository;
+use Leconfe\OaiMetadata\Oai\OaiXml as Xml;
+use Leconfe\OaiMetadata\Oai\Repository;
 
-use Malsoryz\OaiXml\Oai\Identifier\Granularity;
+use Leconfe\OaiMetadata\Oai\Identifier\Granularity;
 
-class OaiXml extends Plugin
+class OaiMetadata extends Plugin
 {
     public function boot()
     {

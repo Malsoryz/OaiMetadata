@@ -1,11 +1,11 @@
 <?php
 
-namespace Malsoryz\OaiXml\Oai\Metadata;
+namespace Leconfe\OaiMetadata\Oai\Metadata;
 
 use App\Models\Submission;
-use Malsoryz\OaiXml\Oai\Identifier\Granularity;
+use Leconfe\OaiMetadata\Oai\Identifier\Granularity;
 
-use Malsoryz\OaiXml\Concerns\Oai\HasMetadata;
+use Leconfe\OaiMetadata\Concerns\Oai\HasMetadata;
 
 enum DublinCore: string implements HasMetadata
 {

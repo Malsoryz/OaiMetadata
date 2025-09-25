@@ -1,9 +1,9 @@
 <?php
 
-namespace Malsoryz\OaiXml\Concerns\Oai;
+namespace Leconfe\OaiMetadata\Concerns\Oai;
 
-use Malsoryz\OaiXml\Oai\Response as VerbResponse;
-use Malsoryz\OaiXml\Oai\OaiXml;
+use Leconfe\OaiMetadata\Oai\Response as VerbResponse;
+use Leconfe\OaiMetadata\Oai\OaiXml;
 
 use Illuminate\Http\Request;
 

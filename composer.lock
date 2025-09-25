@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5d28a21f9a22c5ee4002ae67657a49ac",
+    "content-hash": "df950b08bae62fc76022eba5d3dcc1da",
     "packages": [
         {
             "name": "spatie/array-to-xml",

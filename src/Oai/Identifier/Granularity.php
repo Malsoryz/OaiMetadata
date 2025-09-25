@@ -1,6 +1,6 @@
 <?php
 
-namespace Malsoryz\OaiXml\Oai\Identifier;
+namespace Leconfe\OaiMetadata\Oai\Identifier;
 
 use Illuminate\Support\Carbon;
 

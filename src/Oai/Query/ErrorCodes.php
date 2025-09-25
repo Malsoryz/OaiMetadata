@@ -1,9 +1,9 @@
 <?php
 
-namespace Malsoryz\OaiXml\Oai\Query;
+namespace Leconfe\OaiMetadata\Oai\Query;
 
 use Illuminate\Http\Request;
-use Malsoryz\OaiXml\Oai\Query\Verb;
+use Leconfe\OaiMetadata\Oai\Query\Verb;
 
 class ErrorCodes 
 {
@@ -28,7 +28,7 @@ class ErrorCodes
 
         if ($request->query(Verb::QUERY_VERB) === static::MISSING_ARGUMENT) {
             $errors[] = [
-                '_value' => __('OaiXml::error.verb.missing'),
+                '_value' => __('OaiMetadata::error.verb.missing'),
                 '_attributes' => [
                     'code' => static::BAD_VERB,
                 ],
@@ -37,7 +37,7 @@ class ErrorCodes
             // jika verb illegal
             if (! Verb::tryFrom($request->query(Verb::QUERY_VERB)) && $request->query(Verb::QUERY_VERB) !== static::REPEATED_ARGUMENT) {
                 $errors[] = [
-                    '_value' => __('OaiXml::error.verb.illegal', ['hint' => $request->query(Verb::QUERY_VERB)]),
+                    '_value' => __('OaiMetadata::error.verb.illegal', ['hint' => $request->query(Verb::QUERY_VERB)]),
                     '_attributes' => [
                         'code' => static::BAD_VERB,
                     ],
@@ -48,7 +48,7 @@ class ErrorCodes
         foreach ($queries as $query => $value) {
             if ($value === static::REPEATED_ARGUMENT) {
                 $errors[] = [
-                    '_value' => __('OaiXml::error.argument.repeated', ['hint' => $query]),
+                    '_value' => __('OaiMetadata::error.argument.repeated', ['hint' => $query]),
                     '_attributes' => [
                         'code' => static::BAD_VERB,
                     ],
@@ -62,7 +62,7 @@ class ErrorCodes
             foreach ($requiredQueries as $query) {
                 if (! $request->query($query)) {
                     $errors[] = [
-                        '_value' => __('OaiXml::error.argument.missing', ['hint' => $query]),
+                        '_value' => __('OaiMetadata::error.argument.missing', ['hint' => $query]),
                         '_attributes' => [
                             'code' => static::BAD_ARGUMENT,
                         ],
@@ -74,7 +74,7 @@ class ErrorCodes
             foreach (array_keys($request->query()) as $query) {
                 if (! in_array($query, $allowedQueries)) {
                     $errors[] = [
-                        '_value' => __('OaiXml::error.argument.illegal', ['hint' => $query]),
+                        '_value' => __('OaiMetadata::error.argument.illegal', ['hint' => $query]),
                         '_attributes' => [
                             'code' => static::BAD_ARGUMENT,
                         ],

@@ -1,6 +1,6 @@
 <?php
 
-namespace Malsoryz\OaiXml\Concerns\Oai;
+namespace Leconfe\OaiMetadata\Concerns\Oai;
 
 use App\Models\Submission;
 

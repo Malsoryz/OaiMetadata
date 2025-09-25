@@ -1,19 +1,19 @@
 <?php
 
-namespace Malsoryz\OaiXml\Oai\Query\Verb;
+namespace Leconfe\OaiMetadata\Oai\Query\Verb;
 
 use App\Models\Submission;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Http\Request;
-use Malsoryz\OaiXml\Oai\Metadata\Metadata as EnumMetadata;
-use Malsoryz\OaiXml\Oai\Identifier\Granularity;
-use Malsoryz\OaiXml\Oai\Query\Verb;
+use Leconfe\OaiMetadata\Oai\Metadata\Metadata as EnumMetadata;
+use Leconfe\OaiMetadata\Oai\Identifier\Granularity;
+use Leconfe\OaiMetadata\Oai\Query\Verb;
 
-use Malsoryz\OaiXml\Oai\Response as VerbResponse;
-use Malsoryz\OaiXml\Oai\OaiXml;
+use Leconfe\OaiMetadata\Oai\Response as VerbResponse;
+use Leconfe\OaiMetadata\Oai\OaiXml;
 
-use Malsoryz\OaiXml\Concerns\Oai\HasVerbAction;
+use Leconfe\OaiMetadata\Concerns\Oai\HasVerbAction;
 
 class GetRecord implements HasVerbAction
 {
