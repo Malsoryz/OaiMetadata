@@ -18,6 +18,8 @@ use Malsoryz\OaiXml\Oai\Response as VerbResponse;
 
 use Malsoryz\OaiXml\Oai\Query\Verb;
 
+use Malsoryz\OaiXml\Oai\OaiXml;
+
 class ListRecords implements HasVerbAction
 {
     protected Request $request;
@@ -47,7 +49,7 @@ class ListRecords implements HasVerbAction
         return $records;
     }
 
-    public static function handleVerb(Request $request): VerbResponse
+    public static function handleVerb(Request $request, OaiXml $oaixml): OaiXml
     {
         $verb = Verb::ListRecords;
         $getAllowedQuery = $verb->allowedQuery();

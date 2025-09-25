@@ -11,6 +11,7 @@ use Malsoryz\OaiXml\Oai\Identifier\Granularity;
 use Malsoryz\OaiXml\Oai\Query\Verb;
 
 use Malsoryz\OaiXml\Oai\Response as VerbResponse;
+use Malsoryz\OaiXml\Oai\OaiXml;
 
 use Malsoryz\OaiXml\Concerns\Oai\HasVerbAction;
 
@@ -61,7 +62,7 @@ class GetRecord implements HasVerbAction
         ];
     }
 
-    public static function handleVerb(Request $request): VerbResponse
+    public static function handleVerb(Request $request, OaiXml $oaixml): OaiXml
     {
         $verb = Verb::GetRecord;
         $getAllowedQuery = $verb->allowedQuery();
@@ -91,7 +92,11 @@ class GetRecord implements HasVerbAction
             $verb->value => $getRecord->getRecord(),
         ];
 
-        return new VerbResponse($response, $attributes);
+        $newOai = $oaixml;
+        $newOai->setRequestAttributes($attributes);
+        $newOai->setHandledVerb($response);
+
+        return $newOai;
     }
 
     public function getRecord(): array

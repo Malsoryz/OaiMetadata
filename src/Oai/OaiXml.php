@@ -83,14 +83,13 @@ class OaiXml
         $response = ErrorCodes::check($this->request);
 
         if ($response instanceof Verb) {
-            $getResponse = $response->getClass()::handleVerb($this->request);
-            $this->handledVerb = $getResponse->handledVerb;
-            $this->requestAttributes = $getResponse->requestAttributes;
+            $getResponse = $response->getClass()::handleVerb($this->request, $this);
+            return $getResponse;
         } else {
             $this->errors = $response;
+            return $this;
         }
 
-        return $this;
     }
 
     public function addPI(array $instruction): static
@@ -136,6 +135,24 @@ class OaiXml
                 'xsi:schemaLocation' => 'http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd',
             ],
         ];
+    }
+
+    public function setRequestAttributes(array $attributes): static
+    {
+        $this->requestAttributes = $attributes;
+        return $this;
+    }
+
+    public function pushError(array $error): static
+    {
+        $this->errors[] = $error;
+        return $this;
+    }
+
+    public function setHandledVerb(array $handled): static
+    {
+        $this->handledVerb = $handled;
+        return $this;
     }
 
     ////////////////////////////////////////////////////////////
