@@ -1,17 +1,17 @@
 <?php
 
-namespace Malsoryz\OaiXml\Oai\Query\verb;
+namespace Leconfe\OaiMetadata\Oai\Query\verb;
 
-use Malsoryz\OaiXml\Concerns\Oai\HasVerbAction;
+use Leconfe\OaiMetadata\Concerns\Oai\HasVerbAction;
 
 use Illuminate\Http\Request;
-use Malsoryz\OaiXml\Oai\Response as VerbResponse;
-use Malsoryz\OaiXml\Oai\Query\Verb;
-use Malsoryz\OaiXml\Oai\OaiXml;
+use Leconfe\OaiMetadata\Oai\Response as VerbResponse;
+use Leconfe\OaiMetadata\Oai\Query\Verb;
+use Leconfe\OaiMetadata\Oai\OaiXml;
 
-use Malsoryz\OaiXml\Oai\Sets;
+use Leconfe\OaiMetadata\Oai\Sets;
 
-use Malsoryz\OaiXml\Oai\Query\ErrorCodes;
+use Leconfe\OaiMetadata\Oai\Query\ErrorCodes;
 
 class ListSets implements HasVerbAction
 {
@@ -35,7 +35,7 @@ class ListSets implements HasVerbAction
         if (! count($listSets) >= 1) {
             $response = [
                 'error' => [
-                    '_value' => __('OaiXml::error.sets.missing'),
+                    '_value' => __('OaiMetadata::error.sets.missing'),
                     '_attributes' => [
                         'code' => ErrorCodes::NO_SET_HIERARCHY,
                     ],

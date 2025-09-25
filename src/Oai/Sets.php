@@ -1,8 +1,8 @@
 <?php
 
-namespace Malsoryz\OaiXml\Oai;
+namespace Leconfe\OaiMetadata\Oai;
 
-use Malsoryz\OaiXml\Oai\Metadata\DublinCore;
+use Leconfe\OaiMetadata\Oai\Metadata\DublinCore;
 
 enum Sets: string 
 {

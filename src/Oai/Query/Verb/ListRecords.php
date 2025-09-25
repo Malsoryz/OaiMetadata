@@ -1,6 +1,6 @@
 <?php
 
-namespace Malsoryz\OaiXml\Oai\Query\Verb;
+namespace Leconfe\OaiMetadata\Oai\Query\Verb;
 
 use App\Models\Conference;
 use App\Models\Enums\SubmissionStatus;
@@ -8,11 +8,11 @@ use App\Models\Enums\SubmissionStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Collection;
-use Malsoryz\OaiXml\Oai\OaiXml;
-use Malsoryz\OaiXml\Oai\Query\Verb;
-use Malsoryz\OaiXml\Oai\Query\Verb\GetRecord;
-use Malsoryz\OaiXml\Oai\Metadata\Metadata as EnumMetadata;
-use Malsoryz\OaiXml\Concerns\Oai\HasVerbAction;
+use Leconfe\OaiMetadata\Oai\OaiXml;
+use Leconfe\OaiMetadata\Oai\Query\Verb;
+use Leconfe\OaiMetadata\Oai\Query\Verb\GetRecord;
+use Leconfe\OaiMetadata\Oai\Metadata\Metadata as EnumMetadata;
+use Leconfe\OaiMetadata\Concerns\Oai\HasVerbAction;
 
 class ListRecords implements HasVerbAction
 {

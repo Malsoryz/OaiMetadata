@@ -1,9 +1,9 @@
 <?php
 
-namespace Malsoryz\OaiXml\Oai\Metadata;
+namespace Leconfe\OaiMetadata\Oai\Metadata;
 
 use App\Models\Submission;
-use Malsoryz\OaiXml\Oai\Metadata\DublinCore;
+use Leconfe\OaiMetadata\Oai\Metadata\DublinCore;
 
 enum Metadata: string 
 {

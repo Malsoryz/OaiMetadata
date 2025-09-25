@@ -2,6 +2,6 @@
 
 require 'vendor/autoload.php';
 
-use Malsoryz\OaiXml\OaiXml;
+use Leconfe\OaiMetadata\OaiMetadata;
 
-return new OaiXml;
+return new OaiMetadata;

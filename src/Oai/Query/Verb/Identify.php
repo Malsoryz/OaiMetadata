@@ -1,13 +1,13 @@
 <?php
 
-namespace Malsoryz\OaiXml\Oai\Query\Verb;
+namespace Leconfe\OaiMetadata\Oai\Query\Verb;
 
-use Malsoryz\OaiXml\Concerns\Oai\HasVerbAction;
+use Leconfe\OaiMetadata\Concerns\Oai\HasVerbAction;
 
 use Illuminate\Http\Request;
-use Malsoryz\OaiXml\Oai\Query\Verb;
-use Malsoryz\OaiXml\Oai\Response as VerbResponse;
-use Malsoryz\OaiXml\Oai\OaiXml;
+use Leconfe\OaiMetadata\Oai\Query\Verb;
+use Leconfe\OaiMetadata\Oai\Response as VerbResponse;
+use Leconfe\OaiMetadata\Oai\OaiXml;
 
 class Identify implements HasVerbAction
 {

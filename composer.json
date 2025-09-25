@@ -1,17 +1,14 @@
 {
-    "name": "malsoryz/oai-metadata-format",
+    "name": "leconfe/oai-metadata",
     "autoload": {
         "psr-4": {
-            "Malsoryz\\OaiXml\\": "src/"
-        },
-        "files": [
-            "src/helper.php"
-        ]
+            "Leconfe\\OaiMetadata\\": "src/"
+        }
     },
     "authors": [
         {
-            "name": "Malsoryz",
-            "email": "ikmalalansory@gmail.com"
+            "name": "Leconfe",
+            "email": "leconfe@gmail.com"
         }
     ],
     "require": {

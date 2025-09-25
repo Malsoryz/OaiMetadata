@@ -1,10 +1,10 @@
 <?php
 
-namespace Malsoryz\OaiXml\Oai;
+namespace Leconfe\OaiMetadata\Oai;
 
 use App\Models\Conference;
 use App\Models\Enums\SubmissionStatus;
-use Malsoryz\OaiXml\Oai\Identifier\Granularity;
+use Leconfe\OaiMetadata\Oai\Identifier\Granularity;
 
 class Repository
 {

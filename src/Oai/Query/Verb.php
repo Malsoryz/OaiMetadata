@@ -1,13 +1,13 @@
 <?php
 
-namespace Malsoryz\OaiXml\Oai\Query;
+namespace Leconfe\OaiMetadata\Oai\Query;
 
-use Malsoryz\OaiXml\Oai\Query\Verb\Identify;
-use Malsoryz\OaiXml\Oai\Query\Verb\GetRecord;
-use Malsoryz\OaiXml\Oai\Query\Verb\ListRecords;
-use Malsoryz\OaiXml\Oai\Query\Verb\ListSets;
-use Malsoryz\OaiXml\Oai\Query\Verb\ListMetadataFormats;
-use Malsoryz\OaiXml\Oai\Query\Verb\ListIdentifiers;
+use Leconfe\OaiMetadata\Oai\Query\Verb\Identify;
+use Leconfe\OaiMetadata\Oai\Query\Verb\GetRecord;
+use Leconfe\OaiMetadata\Oai\Query\Verb\ListRecords;
+use Leconfe\OaiMetadata\Oai\Query\Verb\ListSets;
+use Leconfe\OaiMetadata\Oai\Query\Verb\ListMetadataFormats;
+use Leconfe\OaiMetadata\Oai\Query\Verb\ListIdentifiers;
 
 enum Verb: string 
 {
