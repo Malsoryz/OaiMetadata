@@ -7,6 +7,8 @@ use Leconfe\OaiMetadata\Oai\Identifier\Granularity;
 
 use Leconfe\OaiMetadata\Concerns\Oai\HasMetadata;
 
+use Illuminate\Support\Str;
+
 enum DublinCore: string implements HasMetadata
 {
     case Title = 'title';
@@ -94,6 +96,8 @@ enum DublinCore: string implements HasMetadata
             'title' => $paper->getLocalizedMeta('title'),
             'date' => Granularity::Second->format($paper->published_at),
             'creator' => $paper->authors->pluck('fullname')->toArray(),
+            'format' => 'application/pdf',
+            'type' => 'Text',
             'identifier' => [
                 route('livewirePageGroup.conference.pages.paper', [
                     'conference' => $paper->conference,
@@ -102,28 +106,34 @@ enum DublinCore: string implements HasMetadata
                 $paper->doi?->doi,
             ],
             'subject' => $paper->getMeta('keywords'),
-            'source' => $paper->proceeding->seriesTitle(),
-            'description' => $paper->getLocalizedMeta('abstract'),
+            'source' => $paper->proceeding->seriesTitle().'; '.$paper->getMeta('article_pages'),
+            'description' => Str::of($paper->getLocalizedMeta('abstract'))->stripTags(),
             'relation' => route('livewirePageGroup.conference.pages.paper', [
                 'conference' => $paper->conference,
                 'submission' => $paper->id,
             ]),
-            'language' => 'eng',
+            'language' => array_keys($paper->getMeta('abstract')),
         ];
 
-        $record = [];
+        return static::makeElement($data);
+    }
+
+    public static function makeElement(array $data): array
+    {
+        $metadataRootElement = self::METADATA_PREFIX.':'.self::ELEMENT_PREFIX;
+        $newElement = [];
 
         $orders = static::getElementOrder();
 
         foreach ($orders as $order) {
             if (array_key_exists($order, $data)) {
                 [$name, $dataValue] = static::make($order, $data[$order]);
-                $record[$metadataRootElement][$name] = $dataValue;
+                $newElement[$metadataRootElement][$name] = $dataValue;
             }
         }
 
-        $record[$metadataRootElement]['_attributes'] = self::getMetadataAttributes();
+        $newElement[$metadataRootElement]['_attributes'] = self::getMetadataAttributes();
 
-        return $record;
+        return $newElement;
     }
 }

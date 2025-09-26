@@ -4,6 +4,7 @@ namespace Leconfe\OaiMetadata\Oai\Query\Verb;
 
 use App\Models\Submission;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Http\Request;
 use Leconfe\OaiMetadata\Oai\Metadata\Metadata as EnumMetadata;
@@ -12,6 +13,8 @@ use Leconfe\OaiMetadata\Oai\Query\Verb;
 
 use Leconfe\OaiMetadata\Oai\Response as VerbResponse;
 use Leconfe\OaiMetadata\Oai\OaiXml;
+
+use Leconfe\OaiMetadata\Oai\Sets;
 
 use Leconfe\OaiMetadata\Concerns\Oai\HasVerbAction;
 
@@ -60,6 +63,11 @@ class GetRecord implements HasVerbAction
             ],
             'metadata' => EnumMetadata::from($metadata)->getClass()::serialize($this->paper),
         ];
+
+        if ($this->paper->topics()->exists()) {
+            $this->record['header']['setSpec'] = $this->paper->topics->pluck('name')
+                ->map(fn ($name) => $this->paper->conference->path.':'.Str::of($name)->slug())->toArray();
+        }
     }
 
         public function getRecord(): array
@@ -108,10 +116,10 @@ class GetRecord implements HasVerbAction
 
     //////////////////////////////////////////////////////////
 
-    public static function handleVerb(OaiXml $origin): OaiXml
+    public static function handleVerb(OaiXml $oaixml): OaiXml
     {
-        $verb = $origin->getCurrentVerb();
-        $request = $origin->getRequest();
+        $verb = $oaixml->getCurrentVerb();
+        $request = $oaixml->getRequest();
 
         $getAllowedQuery = $verb->allowedQuery();
 
@@ -134,7 +142,7 @@ class GetRecord implements HasVerbAction
 
         $getRecord = new GetRecord($getID, $request);
 
-        $newOai = $origin;
+        $newOai = $oaixml;
         $newOai->setRequestAttributes($attributes)
             ->setHandledVerb([
                 $verb->value => [

@@ -37,14 +37,8 @@ class OaiMetadata extends Plugin
     {
         Route::middleware('web')->group(function () {
             Route::get('{conference:path}/oai', function (Conference $conference, Request $request) {
-                $repository = new Repository(
-                    'Leconfe',
-                    $conference,
-                    $request->url(),
-                    Granularity::Second
-                );
-
-                $xml = new Xml($request, $conference, $repository);
+                $xml = new Xml($request);
+                
                 $xml->handle(now())
                     ->addPI([
                         'xml-stylesheet' => [

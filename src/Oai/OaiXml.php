@@ -19,7 +19,7 @@ use DOMDocument;
 class OaiXml
 {
     protected Request $request;
-    protected Conference $conference;
+    protected ?Conference $conference;
     protected Carbon $responseDate;
 
     protected Repository $repository;
@@ -33,17 +33,18 @@ class OaiXml
     protected array $errors = [];
     protected array $requestAttributes = [];
 
-    public function __construct(
-        Request $request,
-        Conference $conference,
-        Repository $repository
-    )
+    public function __construct(Request $request)
     {
-        $this->conference = $conference;
+        $this->conference = $request->route('conference');
         $this->request = $request;
-        $this->repository = $repository;
 
+        $this->makeRepository($request);
         $this->rootElement = $this->rootElement();
+    }
+
+    public function makeRepository(Request $request): void
+    {
+        $this->repository = new Repository($request);
     }
 
     public function convert(
@@ -133,7 +134,7 @@ class OaiXml
         ];
     }
 
-    public function getConference(): Conference
+    public function getConference(): ?Conference
     {
         return $this->conference;
     }

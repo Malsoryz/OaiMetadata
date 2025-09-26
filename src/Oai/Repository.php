@@ -4,6 +4,7 @@ namespace Leconfe\OaiMetadata\Oai;
 
 use App\Models\Conference;
 use App\Models\Enums\SubmissionStatus;
+use Illuminate\Http\Request;
 use Leconfe\OaiMetadata\Oai\Identifier\Granularity;
 
 class Repository
@@ -17,21 +18,20 @@ class Repository
     protected string $adminEmail;
 
     public function __construct(
-        string $name,
-        Conference $conference,
-        string $baseUrl,
-        Granularity $granularity,
+        Request $request,
+        Granularity|string $granularity = 'YYYY-MM-DDThh:mm:ssZ',
         string $protocolVersion = '2.0',
-        string $deletedRecordPolicy = 'persistent',
-        string $adminEmail = '',
+        string $deletedRecordPolicy = 'no',
     )
     {
-        $this->name = $name;
-        $this->baseUrl = $baseUrl;
+        $conference = $request->route('conference');
+
+        $this->name = $conference->name;
+        $this->baseUrl = $request->url();
         $this->protocolVersion = $protocolVersion;
         $this->deletedRecordPolicy = $deletedRecordPolicy;
-        $this->granularity = $granularity;
-        $this->adminEmail = $adminEmail;
+        $this->granularity = $granularity instanceof Granularity ? $granularity : Granularity::from($granularity);
+        $this->adminEmail = $conference->conferenceUsers()->role('Admin')->first()->email;
 
         $this->earliestDatestamp = $this->getEarlistDatestamp($conference);
     }

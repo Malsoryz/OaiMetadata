@@ -11,7 +11,7 @@ return [
         'repeated' => "Do not use the same ':hint' argument more than once.",
         'illegal' => "':hint' is a illegal argument.",
     ],
-    'sets' => [
-        'missing' => 'No sets available.',
+    'set' => [
+        'not-supported' => 'Sets Hierarchy is not supported by this repository.',
     ],
 ];

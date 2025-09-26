@@ -5,6 +5,7 @@ namespace Leconfe\OaiMetadata\Oai\Query\verb;
 use Leconfe\OaiMetadata\Concerns\Oai\HasVerbAction;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Leconfe\OaiMetadata\Oai\Response as VerbResponse;
 use Leconfe\OaiMetadata\Oai\Query\Verb;
 use Leconfe\OaiMetadata\Oai\OaiXml;
@@ -28,23 +29,39 @@ class ListSets implements HasVerbAction
             }
         }
 
-        $listSets = Sets::getListSets();
-
         $response = [];
 
-        if (! count($listSets) >= 1) {
-            $response = [
-                'error' => [
-                    '_value' => __('OaiMetadata::error.sets.missing'),
+        if ($conference = $oaixml->getConference()) {
+            $response['set'][] = [
+                'setSpec' => $conference->path,
+                'setName' => $conference->name,
+            ];
+
+            foreach ($conference->topics->pluck('name') as $topic) {
+                $response['set'][] = [
+                    'setSpec' => $conference->path.':'.Str::of($topic)->lower()->kebab()->toString(),
+                    'setName' => $topic,
+                ];
+            }
+        }
+
+        if (array_key_exists('set', $response)) {
+            if (! count($response['set']) >= 1) {
+                unset($response['set']);
+                $response['error'] = [
+                    '_value' => __('OaiMetadata::error.set.not-supported'),
                     '_attributes' => [
                         'code' => ErrorCodes::NO_SET_HIERARCHY,
                     ],
+                ];
+            }
+        } else {
+            $response['error'] = [
+                '_value' => __('OaiMetadata::error.set.not-supported'),
+                '_attributes' => [
+                    'code' => ErrorCodes::NO_SET_HIERARCHY,
                 ],
             ];
-        } else {
-            foreach ($listSets as $set) {
-                $response['set'][] = $set;
-            }
         }
 
         return $oaixml

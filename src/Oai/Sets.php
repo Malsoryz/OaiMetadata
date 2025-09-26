@@ -2,34 +2,22 @@
 
 namespace Leconfe\OaiMetadata\Oai;
 
-use Leconfe\OaiMetadata\Oai\Metadata\DublinCore;
+use App\Models\Submission;
+use App\Models\Topic;
+use Illuminate\Support\Str;
 
-enum Sets: string 
+class Sets
 {
-    case Paper = 'paper';
-
-    public function getData(): array
+    public static function parseSet(Submission $paper, string $set): ?Topic
     {
-        return match ($this) {
-            self::Paper => [
-                'setSpec' => 'ppr',
-                'setName' => 'Published Leconfe Submission',
-                'setDescription' => [
-                    'oai_dc:dc' => [
-                        '_attributes' => DublinCore::getMetadataAttributes(),
-                        'dc:description' => 'Jurnal Conference Leconfe Terpublikasi',
-                    ],
-                ]
-            ],
-        };
-    }
+        $result = null;
 
-    public static function getListSets(): array
-    {
-        return [
-            'set' => array_map(function ($case) {
-                return $case->getData();
-            }, static::cases()),
-        ];
+        foreach ($paper->topics as $topic) {
+            if (dd($paper->conference->path.':'.Str::of($topic->name)->slug(), $set)) {
+                $result = $topic;
+            }
+        }
+
+        return $result;
     }
 }
