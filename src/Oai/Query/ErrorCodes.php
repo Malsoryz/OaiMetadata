@@ -3,9 +3,13 @@
 namespace Leconfe\OaiMetadata\Oai\Query;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
+use Illuminate\Support\Collection;
 use Leconfe\OaiMetadata\Oai\Query\Verb;
 
 use Leconfe\OaiMetadata\Oai\Wrapper\Error as OaiError;
+use Leconfe\OaiMetadata\Classes\ExceptionCollection;
 
 class ErrorCodes 
 {
@@ -38,31 +42,31 @@ class ErrorCodes
 
     public static function check(Request $request): array|Verb
     {
-        $errors = [];
+        $errors = new ExceptionCollection(OaiError::class);
 
         $queries = self::retrieveUrlQuery($request);
 
         if ($request->query(Verb::QUERY_VERB) === static::MISSING_ARGUMENT) {
-            $errors[] = new OaiError(
+            $errors->throw(new OaiError(
                 __('OaiMetadata::error.verb.missing'),
                 static::BAD_VERB
-            );
+            ));
         } else {
             // jika verb illegal
             if (! Verb::tryFrom($request->query(Verb::QUERY_VERB)) && $request->query(Verb::QUERY_VERB) !== static::REPEATED_ARGUMENT) {
-                $errors[] = new OaiError(
+                $errors->throw(new OaiError(
                     __('OaiMetadata::error.verb.illegal', ['hint' => $request->query(Verb::QUERY_VERB)]),
                     static::BAD_VERB
-                );
+                ));
             }
         }
 
         foreach ($queries as $query => $value) {
             if ($value === static::REPEATED_ARGUMENT) {
-                $errors[] = new OaiError(
+                $errors->throw(new OaiError(
                     __('OaiMetadata::error.argument.repeated', ['hint' => $query]),
                     static::BAD_VERB
-                );
+                ));
             }
         }
 
@@ -71,58 +75,52 @@ class ErrorCodes
             $requiredQueries = $verb->requiredQuery();
             foreach ($requiredQueries as $query) {
                 if (! $request->query($query)) {
-                    $errors[] = new OaiError(
+                    $errors->throw(new OaiError(
                         __('OaiMetadata::error.argument.missing', ['hint' => $query]),
                         static::BAD_ARGUMENT,
-                    );
+                    ));
                 }
             }
 
             $allowedQueries = $verb->allowedQuery();
             foreach (array_keys($request->query()) as $query) {
                 if (! in_array($query, $allowedQueries)) {
-                    $errors[] = new OaiError(
+                    $errors->throw(new OaiError(
                         __('OaiMetadata::error.argument.illegal', ['hint' => $query]),
                         static::BAD_ARGUMENT
-                    );
+                    ));
                 }
             }
         }
 
-        return count($errors) >= 1 ? $errors : Verb::from($request->query('verb'));
+        if ($errors->hasExceptions()) {
+            throw $errors;
+        }
+
+        return Verb::from($request->query('verb'));
     }
 
     // hanya untuk mengecek argument jika didefinisikan dua kali
     // karena kalau menggunakan $request saja hasilnya akan mengambil
     // query terakhir
-    private static function retrieveUrlQuery(Request $request): array
+    private static function retrieveUrlQuery(Request $request): Collection
     {
         $rawQuery = parse_url($request->server('REQUEST_URI'), PHP_URL_QUERY);
-
-        if ($rawQuery === null) {
-            return [];
+        $data = Str::of($rawQuery)->explode('&');
+        
+        if ($data->isEmpty()) {
+            return $data->filter();
         }
 
-        $pairs = explode('&', $rawQuery);
-        $result = [];
-
-        foreach ($pairs as $query) {
-            if (trim($query) === '') {
-                continue;
-            }
-
-            [$key, $value] = array_pad(explode('=', $query, 2), 2, null);
-            $key = $key ?? '';
-            $value = urldecode($value);
-
-            if (!array_key_exists($key, $result)) {
-                $result[$key] = $value;
-            } else {
-                // Kalau ketemu key yang sama lebih dari sekali
-                $result[$key] = static::REPEATED_ARGUMENT;
-            }
-        }
-
-        return $result;
+        return $data->filter()
+            ->mapToGroups(function ($item) {
+                [$key, $value] = explode('=', $item, 2);
+                return [$key => $value];
+            })
+            ->map(function ($item) {
+                return $item->count() > 1 
+                    ? static::REPEATED_ARGUMENT 
+                    : $item->first();
+            });
     }
 }

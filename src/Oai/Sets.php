@@ -15,12 +15,8 @@ class Sets
 {
     public const DELIMITER = ':';
 
-    public static function parseSet(Conference $conference, string|null $set): Topic|bool
+    public static function parseSet(Conference $conference, string $set): Topic|bool
     {
-        if (is_null($set)) {
-            return true;
-        }
-
         $path = $conference->path;
         $getSet = Str::of($set);
 

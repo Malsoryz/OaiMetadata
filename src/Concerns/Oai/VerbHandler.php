@@ -8,18 +8,27 @@ use Leconfe\OaiMetadata\Oai\ErrorCodes;
 use Leconfe\OaiMetadata\Oai\Wrapper\Response as OaiResponse;
 use Leconfe\OaiMetadata\Oai\Wrapper\Error as OaiError;
 
+use Leconfe\OaiMetadata\Classes\ExceptionCollection;
+
 use Illuminate\Http\Request;
 
 trait VerbHandler
 {
-    public static function handleVerb(OaiXml $oaixml): OaiXml
+    public function handleVerb(OaiXml $oaixml): OaiXml
     {
         $request = $oaixml->getRequest();
         $verb = $oaixml->getCurrentVerb();
         $repository = $oaixml->getRepository();
 
         // handle this
-        $response = self::handle($request, $repository, $verb);
+        $response = $this->handle($request, $repository, $verb);
+        
+        $attributes = [];
+        foreach ($verb->allowedQuery() as $query) {
+            if (array_key_exists($query, $request->query())) {
+                $attributes[$query] = $request->query($query);
+            }
+        }
 
         $result = match (true) {
             $response instanceof OaiResponse => [
@@ -37,15 +46,8 @@ trait VerbHandler
             }, $response),
         };
 
-        $attributes = [];
-        foreach ($verb->allowedQuery() as $query) {
-            if (array_key_exists($query, $request->query())) {
-                $attributes[$query] = $request->query($query);
-            }
-        }
-
         if (method_exists(self::class, 'checkMetadata')) {
-            $isError = self::checkMetadata($request);
+            $isError = $this->checkMetadata($request);
             if ($isError instanceof OaiError) {
                 $result = ['error' => $isError->toArray()];
             }

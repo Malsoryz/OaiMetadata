@@ -17,6 +17,7 @@ use Spatie\ArrayToXml\ArrayToXml as Xml;
 use Leconfe\OaiMetadata\Oai\Wrapper\Error as OaiError;
 
 use Leconfe\OaiMetadata\Oai\Element;
+use Leconfe\OaiMetadata\Classes\ExceptionCollection;
 
 use DOMDocument;
 
@@ -58,7 +59,7 @@ class OaiXml
         $dataForXml = Element::mainElement($this);
 
         $responseBody = count($this->errors) > 0
-            ? ['error' => OaiError::getErrorsFrom($this->errors)] 
+            ? ['error' => $this->errors] 
             : $this->handledVerb;
 
         $dataForXml = array_merge($dataForXml, $responseBody);
@@ -84,16 +85,19 @@ class OaiXml
 
     public function handle(): static
     {
-        $response = ErrorCodes::check($this->request);
-
-        if ($response instanceof Verb) {
+        try {
+            $response = ErrorCodes::check($this->request);
             $this->currentVerb = $response;
-            $getResponse = $response->getClass()::handleVerb($this);
+            $getClass = new ($response->getClass());
+            $getResponse = $getClass->handleVerb($this);
             return $getResponse;
-        } else {
-            $this->errors = $response;
-            return $this;
+        } catch (ExceptionCollection $exceptions) {
+            foreach ($exceptions->getAllExceptions() as $exception) {
+                $this->errors[] = $exception->toArray();
+            }
         }
+
+        return $this;
     }
 
     public function addPI(array $instruction): static

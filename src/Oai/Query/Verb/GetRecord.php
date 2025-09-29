@@ -23,7 +23,7 @@ class GetRecord implements HasVerbAction
 {
     use VerbHandler, MetadataPrefixChecker;
 
-    public static function handle(Request $request, Repository $repository, Verb $verb): OaiResponse|OaiError|array 
+    public function handle(Request $request, Repository $repository, Verb $verb): OaiResponse|OaiError|array 
     {
         $paper = $repository->parseIdentifier($request->route('conference'), $request->query(Verb::QUERY_IDENTIFIER));
 

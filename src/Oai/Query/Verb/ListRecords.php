@@ -27,26 +27,24 @@ class ListRecords implements HasVerbAction
     {
         $conference = $request->route('conference');
 
-        $set = Sets::parseSet($conference, $request->query('set'));
-
-        if (! $set) {
-            return new OaiError(
-                __('OaiMetadata::error.record.no-match.set', ['hint' => $request->query('set')]),
-                ErrorCodes::NO_RECORD_MATCH
-            );
+        if ($request->query(Verb::QUERY_SET)) {
+            $set = Sets::parseSet($conference, $request->query('set'));
+    
+            if (! $set) {
+                return new OaiError(
+                    __('OaiMetadata::error.record.no-match.set', ['hint' => $request->query('set')]),
+                    ErrorCodes::NO_RECORD_MATCH
+                );
+            }
         }
 
-        $submissions = null;
-
-        if ($set instanceof Topic) {
-            $submissions = $set->submissions()
-                ->where('status', SubmissionStatus::Published)
-                ->get();
-        } else {
-            $submissions = $conference->submission()
-                ->where('status', SubmissionStatus::Published)
-                ->get();
-        }
+        $submissions = $conference->submission()
+            ->where('status', SubmissionStatus::Published)
+            ->when($request->query(Verb::QUERY_SET), function ($query) use ($conference, $request) {
+                $topic = Sets::parseSet($conference, $request->query('set'));
+                return $query->whereHas('topics', fn ($topicQuery) => $topicQuery->whereKey($topic));
+            })
+            ->get();
 
         $records = [];
         foreach ($submissions as $paper) {

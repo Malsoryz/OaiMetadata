@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 
 trait MetadataPrefixChecker
 {
-    public static function checkMetadata(Request $request): OaiError|Metadata
+    public function checkMetadata(Request $request): OaiError|Metadata
     {
         return Metadata::checkMetadataFormat($request->query(Verb::QUERY_METADATA_PREFIX));
     }

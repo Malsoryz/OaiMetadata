@@ -32,7 +32,13 @@ class Element
         ];
     }
 
-    // pending
+    public function error(array $errors): array
+    {
+        return [
+            'error' => $errors
+        ];
+    }
+
     public static function oaiIdentifier(array $description): array
     {
         $scheme = $description['scheme'] ?? 'oai';

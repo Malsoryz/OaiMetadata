@@ -9,14 +9,20 @@ use Leconfe\OaiMetadata\Oai\Wrapper\Error as OaiError;
 use Leconfe\OaiMetadata\Contracts\Oai\HasVerbAction;
 use Leconfe\OaiMetadata\Concerns\Oai\VerbHandler;
 
+use Leconfe\OaiMetadata\Classes\ExceptionCollection;
+
 use Illuminate\Http\Request;
 
 class Identify implements HasVerbAction
 {
     use VerbHandler;
 
-    public static function handle(Request $request, Repository $repository, Verb $verb): OaiResponse|OaiError|array
+    public function handle(Request $request, Repository $repository, Verb $verb): OaiResponse|OaiError|array
     {
+        // throw new ExceptionCollection(OaiError::class, [
+        //     new OaiError('pesan', 'badVerb'),
+        // ]);
+
         return new OaiResponse($repository->getRepositoryInfo());
     }
 }
