@@ -23,7 +23,7 @@ class ListIdentifiers implements HasVerbAction
 {
     use VerbHandler, MetadataPrefixChecker;
 
-    public static function handle(Request $request, Repository $repository, Verb $verb): OaiResponse|OaiError|array
+    public function handle(Request $request, Repository $repository, Verb $verb): OaiResponse|OaiError|array
     {
         $conference = $request->route('conference');
 

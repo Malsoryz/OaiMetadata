@@ -16,7 +16,7 @@ class ListMetadataFormats implements HasVerbAction
 {
     use VerbHandler;
 
-    public static function handle(Request $request, Repository $repository, Verb $verb): OaiResponse|OaiError|array
+    public function handle(Request $request, Repository $repository, Verb $verb): OaiResponse|OaiError|array
     {
         return new OaiResponse(Metadata::getListMetadata());
     }
