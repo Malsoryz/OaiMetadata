@@ -39,13 +39,12 @@ class OaiMetadata extends Plugin
             Route::get('{conference:path}/oai', function (Conference $conference, Request $request) {
                 $xml = new Xml($request);
                 
-                $xml->handle(now())
-                    ->addPI([
-                        'xml-stylesheet' => [
-                            'type' => 'text/xsl',
-                            'href' => asset($this->getAssetsPath('lib/xsl/oai2.xsl')),
-                        ],
-                    ]);
+                $xml->handle()->addPI([
+                    'xml-stylesheet' => [
+                        'type' => 'text/xsl',
+                        'href' => asset($this->getAssetsPath('lib/xsl/oai2.xsl')),
+                    ],
+                ]);
 
                 return response($xml->convert()->saveXML(), 200)
                     ->header('Content-type', 'application/xml');

@@ -3,75 +3,63 @@
 namespace Leconfe\OaiMetadata\Oai\Query\Verb;
 
 use App\Models\Conference;
+use App\Models\Topic;
 use App\Models\Enums\SubmissionStatus;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
-use Illuminate\Database\Eloquent\Collection;
-use Leconfe\OaiMetadata\Oai\OaiXml;
 use Leconfe\OaiMetadata\Oai\Query\Verb;
-use Leconfe\OaiMetadata\Oai\Query\Verb\GetRecord;
-use Leconfe\OaiMetadata\Oai\Metadata\Metadata as EnumMetadata;
-use Leconfe\OaiMetadata\Concerns\Oai\HasVerbAction;
+use Leconfe\OaiMetadata\Oai\Record;
+use Leconfe\OaiMetadata\Oai\Repository;
+use Leconfe\OaiMetadata\Oai\Wrapper\Response as OaiResponse;
+use Leconfe\OaiMetadata\Oai\Wrapper\Error as OaiError;
+use Leconfe\OaiMetadata\Oai\Query\ErrorCodes;
+use Leconfe\OaiMetadata\Oai\Sets;
+use Leconfe\OaiMetadata\Concerns\Oai\VerbHandler;
+use Leconfe\OaiMetadata\Contracts\Oai\HasVerbAction;
+use Leconfe\OaiMetadata\Concerns\Oai\MetadataPrefixChecker;
+
+use Illuminate\Http\Request;
 
 class ListRecords implements HasVerbAction
 {
-    protected Request $request;
-    protected Collection $submissions;
+    use VerbHandler, MetadataPrefixChecker;
 
-    protected const IDENTIFIER_RECORD_PREFIX = 'paper';
-
-    public function __construct(
-        Request $request,
-        Conference $conference,
-    ) {
-        $this->request = $request;
-        $this->submissions = $conference->submission()
-            ->where('status', SubmissionStatus::Published)
-            ->get();
-    }
-
-    public function getRecords(): array
+    public static function handle(Request $request, Repository $repository, Verb $verb): OaiResponse|OaiError|array
     {
-        $records = [];
+        $conference = $request->route('conference');
 
-        foreach ($this->submissions as $submission) {
-            $newRecord = new GetRecord($submission, $this->request);
-            $records['record'][] = $newRecord->get();
+        $set = Sets::parseSet($conference, $request->query('set'));
+
+        if (! $set) {
+            return new OaiError(
+                __('OaiMetadata::error.record.no-match.set', ['hint' => $request->query('set')]),
+                ErrorCodes::NO_RECORD_MATCH
+            );
         }
 
-        return $records;
-    }
+        $submissions = null;
 
-    public static function handleVerb(OaiXml $oaixml): OaiXml
-    {
-        $submissions = $oaixml->getConference()
-            ->submission()
-            ->where('status', SubmissionStatus::Published)->get();
-
-        $request = $oaixml->getRequest();
-        $verb = $oaixml->getCurrentVerb();
-        $getAllowedQuery = $verb->allowedQuery();
-
-        $attributes = [];
-        foreach ($getAllowedQuery as $query) {
-            if (array_key_exists($query, $request->query())) {
-                $attributes[$query] = $request->query($query);
-            }
+        if ($set instanceof Topic) {
+            $submissions = $set->submissions()
+                ->where('status', SubmissionStatus::Published)
+                ->get();
+        } else {
+            $submissions = $conference->submission()
+                ->where('status', SubmissionStatus::Published)
+                ->get();
         }
 
         $records = [];
-
         foreach ($submissions as $paper) {
-            $newRecord = new GetRecord($paper, $request);
-            $records[] = $newRecord->getRecord();
+            $newRecord = new Record($paper, $request, $repository);
+            $record = $newRecord->getRecord();
+
+            if ($record instanceof OaiError) {
+                return $record;
+            }
+
+            $records[] = $record;
         }
 
-        $oaixml->setRequestAttributes($attributes)
-            ->setHandledVerb([$verb->value => [
-                'record' => $records,
-            ]]);
-
-        return $oaixml;
+        return new OaiResponse(['record' => $records]);
     }
 }

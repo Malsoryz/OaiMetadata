@@ -3,44 +3,42 @@
 namespace Leconfe\OaiMetadata\Oai\Query\verb;
 
 use App\Models\Enums\SubmissionStatus;
-use Leconfe\OaiMetadata\Concerns\Oai\HasVerbAction;
+
+use Leconfe\OaiMetadata\Oai\Query\Verb;
+use Leconfe\OaiMetadata\Oai\Repository;
+use Leconfe\OaiMetadata\Oai\Record;
+use Leconfe\OaiMetadata\Oai\Wrapper\Response as OaiResponse;
+use Leconfe\OaiMetadata\Oai\Wrapper\Error as OaiError;
+use Leconfe\OaiMetadata\Contracts\Oai\HasVerbAction;
+use Leconfe\OaiMetadata\Concerns\Oai\VerbHandler;
+use Leconfe\OaiMetadata\Concerns\Oai\MetadataPrefixChecker;
 
 use Illuminate\Http\Request;
-use Leconfe\OaiMetadata\Oai\Response as VerbResponse;
-use Leconfe\OaiMetadata\Oai\Query\Verb;
-use Leconfe\OaiMetadata\Oai\Query\Verb\GetRecord;
-use Leconfe\OaiMetadata\Oai\OaiXml;
 
 class ListIdentifiers implements HasVerbAction
 {
-    public static function handleVerb(OaiXml $oaixml): OaiXml
+    use VerbHandler, MetadataPrefixChecker;
+
+    public static function handle(Request $request, Repository $repository, Verb $verb): OaiResponse|OaiError|array
     {
-        $submissions = $oaixml->getConference()
-            ->submission()
-            ->where('status', SubmissionStatus::Published)->get();
-
-        $request = $oaixml->getRequest();
-        $verb = $oaixml->getCurrentVerb();
-        $getAllowedQuery = $verb->allowedQuery();
-
-        $attributes = [];
-        foreach ($getAllowedQuery as $query) {
-            if (array_key_exists($query, $request->query())) {
-                $attributes[$query] = $request->query($query);
-            }
-        }
+        $conference = $request->route('conference');
+        $submissions = $conference->submission()
+            ->where('status', SubmissionStatus::Published)
+            ->get();
 
         $records = [];
 
         foreach ($submissions as $paper) {
-            $newRecord = new GetRecord($paper, $request);
-            $records[] = $newRecord->getRecord()['header'];
+            $newRecord = new Record($paper, $request, $repository);
+            $header = $newRecord->getHeader();
+
+            if ($header instanceof OaiError) {
+                return $header;
+            }
+
+            $records[] = $header;
         }
 
-        return $oaixml
-            ->setRequestAttributes($attributes)
-            ->setHandledVerb([$verb->value => [
-                'header' => $records,
-            ]]);
+        return new OaiResponse(['header' => $records]);
     }
 }

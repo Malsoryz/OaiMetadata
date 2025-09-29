@@ -5,6 +5,8 @@ namespace Leconfe\OaiMetadata\Oai\Query;
 use Illuminate\Http\Request;
 use Leconfe\OaiMetadata\Oai\Query\Verb;
 
+use Leconfe\OaiMetadata\Oai\Wrapper\Error as OaiError;
+
 class ErrorCodes 
 {
     public const BAD_ARGUMENT = 'badArgument';
@@ -20,6 +22,20 @@ class ErrorCodes
     public const REPEATED_ARGUMENT = '$2y$10$zPnmsan2nIDN7IJ6BTH4Deg3ZcUgDrxXzHjP315qxZgE53/aQ16Ca';
     public const MISSING_ARGUMENT = null;
 
+    public static function allErrors(): array
+    {
+        return [
+            self::BAD_ARGUMENT,
+            self::BAD_RESUMPTION_TOKEN,
+            self::BAD_VERB,
+            self::CANNOT_DISSEMINATE_FORMAT,
+            self::ID_DOES_NOT_EXIST,
+            self::NO_RECORD_MATCH,
+            self::NO_METADATA_FORMAT,
+            self::NO_SET_HIERARCHY,
+        ];
+    }
+
     public static function check(Request $request): array|Verb
     {
         $errors = [];
@@ -27,32 +43,26 @@ class ErrorCodes
         $queries = self::retrieveUrlQuery($request);
 
         if ($request->query(Verb::QUERY_VERB) === static::MISSING_ARGUMENT) {
-            $errors[] = [
-                '_value' => __('OaiMetadata::error.verb.missing'),
-                '_attributes' => [
-                    'code' => static::BAD_VERB,
-                ],
-            ];
+            $errors[] = new OaiError(
+                __('OaiMetadata::error.verb.missing'),
+                static::BAD_VERB
+            );
         } else {
             // jika verb illegal
             if (! Verb::tryFrom($request->query(Verb::QUERY_VERB)) && $request->query(Verb::QUERY_VERB) !== static::REPEATED_ARGUMENT) {
-                $errors[] = [
-                    '_value' => __('OaiMetadata::error.verb.illegal', ['hint' => $request->query(Verb::QUERY_VERB)]),
-                    '_attributes' => [
-                        'code' => static::BAD_VERB,
-                    ],
-                ];
+                $errors[] = new OaiError(
+                    __('OaiMetadata::error.verb.illegal', ['hint' => $request->query(Verb::QUERY_VERB)]),
+                    static::BAD_VERB
+                );
             }
         }
 
         foreach ($queries as $query => $value) {
             if ($value === static::REPEATED_ARGUMENT) {
-                $errors[] = [
-                    '_value' => __('OaiMetadata::error.argument.repeated', ['hint' => $query]),
-                    '_attributes' => [
-                        'code' => static::BAD_VERB,
-                    ],
-                ];
+                $errors[] = new OaiError(
+                    __('OaiMetadata::error.argument.repeated', ['hint' => $query]),
+                    static::BAD_VERB
+                );
             }
         }
 
@@ -61,24 +71,20 @@ class ErrorCodes
             $requiredQueries = $verb->requiredQuery();
             foreach ($requiredQueries as $query) {
                 if (! $request->query($query)) {
-                    $errors[] = [
-                        '_value' => __('OaiMetadata::error.argument.missing', ['hint' => $query]),
-                        '_attributes' => [
-                            'code' => static::BAD_ARGUMENT,
-                        ],
-                    ];
+                    $errors[] = new OaiError(
+                        __('OaiMetadata::error.argument.missing', ['hint' => $query]),
+                        static::BAD_ARGUMENT,
+                    );
                 }
             }
 
             $allowedQueries = $verb->allowedQuery();
             foreach (array_keys($request->query()) as $query) {
                 if (! in_array($query, $allowedQueries)) {
-                    $errors[] = [
-                        '_value' => __('OaiMetadata::error.argument.illegal', ['hint' => $query]),
-                        '_attributes' => [
-                            'code' => static::BAD_ARGUMENT,
-                        ],
-                    ];
+                    $errors[] = new OaiError(
+                        __('OaiMetadata::error.argument.illegal', ['hint' => $query]),
+                        static::BAD_ARGUMENT
+                    );
                 }
             }
         }

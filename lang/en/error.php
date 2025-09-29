@@ -14,4 +14,13 @@ return [
     'set' => [
         'not-supported' => 'Sets Hierarchy is not supported by this repository.',
     ],
+    'record' => [
+        'no-match' => [
+            'set' => "No records match with set ':hint'.",
+        ],
+        'id-doesnt-exist' => "Record with identifier ':hint' doesn't exist."
+    ],
+    'metadata' => [
+        'cannot-disseminate' => "Metadata format ':hint' is not supported by this repository."
+    ],
 ];

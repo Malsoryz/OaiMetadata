@@ -5,7 +5,7 @@ namespace Leconfe\OaiMetadata\Oai\Metadata;
 use App\Models\Submission;
 use Leconfe\OaiMetadata\Oai\Identifier\Granularity;
 
-use Leconfe\OaiMetadata\Concerns\Oai\HasMetadata;
+use Leconfe\OaiMetadata\Contracts\Oai\HasMetadata;
 
 use Illuminate\Support\Str;
 

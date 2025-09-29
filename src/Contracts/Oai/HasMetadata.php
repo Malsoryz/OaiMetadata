@@ -1,6 +1,6 @@
 <?php
 
-namespace Leconfe\OaiMetadata\Concerns\Oai;
+namespace Leconfe\OaiMetadata\Contracts\Oai;
 
 use App\Models\Submission;
 

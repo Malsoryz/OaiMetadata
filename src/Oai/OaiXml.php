@@ -14,14 +14,15 @@ use Leconfe\OaiMetadata\Oai\Metadata\Metadata;
 use Leconfe\OaiMetadata\Oai\Repository;
 use Spatie\ArrayToXml\ArrayToXml as Xml;
 
+use Leconfe\OaiMetadata\Oai\Wrapper\Error as OaiError;
+
+use Leconfe\OaiMetadata\Oai\Element;
+
 use DOMDocument;
 
 class OaiXml
 {
     protected Request $request;
-    protected ?Conference $conference;
-    protected Carbon $responseDate;
-
     protected Repository $repository;
 
     protected Verb $currentVerb;
@@ -35,11 +36,10 @@ class OaiXml
 
     public function __construct(Request $request)
     {
-        $this->conference = $request->route('conference');
         $this->request = $request;
 
         $this->makeRepository($request);
-        $this->rootElement = $this->rootElement();
+        $this->rootElement = Element::rootElement();
     }
 
     public function makeRepository(Request $request): void
@@ -55,16 +55,10 @@ class OaiXml
         array | null $options = ['convertNullToXsiNil' => false, 'convertBoolToString' => false]
     ): DOMDocument
     {
-        $dataForXml = [
-            'responseDate' => $this->responseDate->format('Y-m-d\TH:i:s\Z'),
-            'request' => [
-                '_value' => $this->request->url(),
-                '_attributes' => $this->requestAttributes
-            ],
-        ];
+        $dataForXml = Element::mainElement($this);
 
-        $responseBody = count($this->errors) >= 1 
-            ? ['error' => $this->errors] 
+        $responseBody = count($this->errors) > 0
+            ? ['error' => OaiError::getErrorsFrom($this->errors)] 
             : $this->handledVerb;
 
         $dataForXml = array_merge($dataForXml, $responseBody);
@@ -88,10 +82,8 @@ class OaiXml
         return $xml->toDom();
     }
 
-    public function handle(Carbon $responseDate): static
+    public function handle(): static
     {
-        $this->responseDate = $responseDate;
-
         $response = ErrorCodes::check($this->request);
 
         if ($response instanceof Verb) {
@@ -102,7 +94,6 @@ class OaiXml
             $this->errors = $response;
             return $this;
         }
-
     }
 
     public function addPI(array $instruction): static
@@ -122,23 +113,6 @@ class OaiXml
         return $this;
     }
 
-    public function rootElement(): array
-    {
-        return [
-            'rootElementName' => 'OAI-PMH',
-            '_attributes' => [
-                'xmlns' => 'http://www.openarchives.org/OAI/2.0/',
-                'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
-                'xsi:schemaLocation' => 'http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd',
-            ],
-        ];
-    }
-
-    public function getConference(): ?Conference
-    {
-        return $this->conference;
-    }
-
     public function getRequest(): Request
     {
         return $this->request;
@@ -154,15 +128,14 @@ class OaiXml
         return $this->currentVerb;
     }
 
+    public function getRequestAttributes(): array
+    {
+        return $this->requestAttributes;
+    }
+
     public function setRequestAttributes(array $attributes): static
     {
         $this->requestAttributes = $attributes;
-        return $this;
-    }
-
-    public function pushError(array $error): static
-    {
-        $this->errors[] = $error;
         return $this;
     }
 
