@@ -62,7 +62,7 @@ class ErrorCodes
         }
 
         foreach ($queries as $query => $value) {
-            if ($value === static::REPEATED_ARGUMENT) {
+            if (is_array($value)) {
                 $errors->throw(new OaiError(
                     __('OaiMetadata::error.argument.repeated', ['hint' => $query]),
                     static::BAD_VERB
@@ -119,7 +119,7 @@ class ErrorCodes
             })
             ->map(function ($item) {
                 return $item->count() > 1 
-                    ? static::REPEATED_ARGUMENT 
+                    ? $item->toArray()
                     : $item->first();
             });
     }
