@@ -4,6 +4,7 @@
 return [
     'verb' => [
         'missing' => 'The request does not provide any verb.',
+        'repeated' => 'Do not use the same \'verb\' argument more than once.',
         'illegal' => "':hint' is a illegal verb.",
     ],
     'argument' => [

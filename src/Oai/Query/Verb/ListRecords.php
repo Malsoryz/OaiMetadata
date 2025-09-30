@@ -15,47 +15,33 @@ use Leconfe\OaiMetadata\Oai\Query\ErrorCodes;
 use Leconfe\OaiMetadata\Oai\Sets;
 use Leconfe\OaiMetadata\Concerns\Oai\VerbHandler;
 use Leconfe\OaiMetadata\Contracts\Oai\HasVerbAction;
-use Leconfe\OaiMetadata\Concerns\Oai\MetadataPrefixChecker;
+
+use Leconfe\OaiMetadata\Classes\ExceptionCollection;
 
 use Illuminate\Http\Request;
 
 class ListRecords implements HasVerbAction
 {
-    use VerbHandler, MetadataPrefixChecker;
+    use VerbHandler;
 
-    public function handle(Request $request, Repository $repository, Verb $verb): OaiResponse|OaiError|array
+    public function handle(Request $request, Repository $repository, Verb $verb): OaiResponse
     {
         $conference = $request->route('conference');
 
-        if ($request->query(Verb::QUERY_SET)) {
-            $set = Sets::parseSet($conference, $request->query('set'));
-    
-            if (! $set) {
-                return new OaiError(
-                    __('OaiMetadata::error.record.no-match.set', ['hint' => $request->query('set')]),
-                    ErrorCodes::NO_RECORD_MATCH
-                );
-            }
-        }
-
-        $submissions = $conference->submission()
-            ->where('status', SubmissionStatus::Published)
-            ->when($request->query(Verb::QUERY_SET), function ($query) use ($conference, $request) {
-                $topic = Sets::parseSet($conference, $request->query('set'));
-                return $query->whereHas('topics', fn ($topicQuery) => $topicQuery->whereKey($topic));
-            })
-            ->get();
+        $submissions = $this->getRecords();
 
         $records = [];
         foreach ($submissions as $paper) {
-            $newRecord = new Record($paper, $request, $repository);
-            $record = $newRecord->getRecord();
-
-            if ($record instanceof OaiError) {
-                return $record;
+            try {
+                $newRecord = new Record($paper, $request, $repository);
+                $record = $newRecord->getRecord();
+                $records[] = $record;
+            } catch (ExceptionCollection $exceptions) {
+                foreach ($exceptions->getAllExceptions() as $exception) {
+                    $this->errors->throw($exception);
+                }
+                break;
             }
-
-            $records[] = $record;
         }
 
         return new OaiResponse(['record' => $records]);

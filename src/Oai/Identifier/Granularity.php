@@ -17,4 +17,12 @@ enum Granularity: string
             self::Second => 'Y-m-d\TH:i:s\Z',
         });
     }
+
+    public function getFormat(): string
+    {
+        return match ($this) {
+            self::Day => 'Y-m-d',
+            self::Second => 'Y-m-d\TH:i:s\Z',
+        };
+    }
 }

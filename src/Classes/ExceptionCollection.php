@@ -14,11 +14,13 @@ class ExceptionCollection extends Exception
 
     public function __construct(string $class, Collection|array $errors = [])
     {
+        parent::__construct("This kind of exceptions must be handled by using 'try catch'");
+
         $this->errors = collect();
 
         if (class_exists($class)) {
             $this->class = $class;
-        } else throw new InvalidArgumentException("class {$class} doesn't not exists.");
+        } else throw new InvalidArgumentException("class {$class} does not exists.");
 
         $tmpErrors = $errors instanceof Collection ? $errors : collect($errors);
         foreach ($tmpErrors as $item) {

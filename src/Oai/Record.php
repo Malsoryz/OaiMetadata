@@ -9,6 +9,9 @@ use Leconfe\OaiMetadata\Oai\Query\Verb;
 use Leconfe\OaiMetadata\Oai\Repository;
 use Leconfe\OaiMetadata\Oai\Sets;
 use Leconfe\OaiMetadata\Oai\Wrapper\Error as OaiError;
+use Leconfe\OaiMetadata\Oai\Query\ErrorCodes;
+
+use Leconfe\OaiMetadata\Classes\ExceptionCollection;
 
 use Illuminate\Http\Request;
 
@@ -16,6 +19,7 @@ class Record
 {
     protected ?Submission $paper;
     protected Repository $repository;
+    protected EnumMetadata|string $metadataFormat;
 
     public function __construct(
         Submission|string|int $paper, 
@@ -25,30 +29,27 @@ class Record
         $this->paper = $paper instanceof Submission ? $paper : Submission::find($paper);
         $this->request = $request;
         $this->repository = $repository;
+        
+        if ($metadata = EnumMetadata::tryFrom($request->query(Verb::QUERY_METADATA_PREFIX))) {
+            $this->metadataFormat = $metadata;
+        } else {
+            throw new ExceptionCollection(OaiError::class, [new OaiError(
+                __('OaiMetadata::error.metadata.cannot-disseminate', ['hint' => $request->query(Verb::QUERY_METADATA_PREFIX)]),
+                ErrorCodes::CANNOT_DISSEMINATE_FORMAT
+            )]);
+        }
     }
 
-    public function getRecord(): OaiError|array
+    public function getRecord(): array
     {
-        $metadata = $this->getMetadata();
-
-        if ($metadata instanceof OaiError) {
-            return $metadata;
-        }
-
         return [
             'header' => $this->getHeader(),
-            'metadata' => $metadata,
+            'metadata' => $this->getMetadata(),
         ];
     }
 
-    public function getHeader(): OaiError|array
+    public function getHeader(): array
     {
-        $isError = EnumMetadata::checkMetadataFormat($this->request->query(Verb::QUERY_METADATA_PREFIX));
-
-        if ($isError instanceof OaiError) {
-            return $isError;
-        }
-
         return [
             'identifier' => $this->repository->createIdentifier($this->paper),
             'datestamp' => $this->repository->getGranularity()->format($this->paper->updated_at),
@@ -56,7 +57,7 @@ class Record
         ];
     }
 
-    public function getMetadata(): OaiError|array
+    public function getMetadata(): array
     {
         $this->paper->load([
             'proceeding', 
@@ -69,11 +70,7 @@ class Record
             ])
         ]);
 
-        $result = EnumMetadata::checkMetadataFormat($this->request->query(Verb::QUERY_METADATA_PREFIX));
-
-        if ($result instanceof OaiError) {
-            return $result;
-        }
+        $result = $this->metadataFormat;
 
         return $result->getClass()::serialize($this->paper);
     }

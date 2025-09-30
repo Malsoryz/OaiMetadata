@@ -9,6 +9,16 @@ use Leconfe\OaiMetadata\Oai\Query\Verb\ListSets;
 use Leconfe\OaiMetadata\Oai\Query\Verb\ListMetadataFormats;
 use Leconfe\OaiMetadata\Oai\Query\Verb\ListIdentifiers;
 
+use Leconfe\OaiMetadata\Classes\ExceptionCollection;
+use Leconfe\OaiMetadata\Oai\Wrapper\Error as OaiError;
+use Leconfe\OaiMetadata\Oai\Query\ErrorCodes;
+use Leconfe\OaiMetadata\Oai\Query\Verb;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
+
 enum Verb: string 
 {
     case Identify = 'Identify';

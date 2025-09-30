@@ -15,7 +15,7 @@ class Sets
 {
     public const DELIMITER = ':';
 
-    public static function parseSet(Conference $conference, string $set): Topic|bool
+    public static function parseSet(Conference $conference, string $set): Topic|string|null
     {
         $path = $conference->path;
         $getSet = Str::of($set);
@@ -26,14 +26,14 @@ class Sets
 
         if ($getSet->startsWith($path)) {
             if ($getSet->endsWith($path)) {
-                return true;
+                return $getSet->toString();
             } 
 
             $setSpec = $getSet->after(self::DELIMITER)->toString();
-            return array_key_exists($setSpec, $listSets->toArray()) ? $listSets[$setSpec] : false;
+            return $listSets[$setSpec] ?? null;
         }
 
-        return false;
+        return null;
     }
 
     public static function makeSet(Submission $paper): array

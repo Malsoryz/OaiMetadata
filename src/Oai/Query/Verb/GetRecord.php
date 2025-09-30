@@ -12,7 +12,8 @@ use Leconfe\OaiMetadata\Oai\Wrapper\Error as OaiError;
 use Leconfe\OaiMetadata\Oai\Record;
 use Leconfe\OaiMetadata\Contracts\Oai\HasVerbAction;
 use Leconfe\OaiMetadata\Concerns\Oai\VerbHandler;
-use Leconfe\OaiMetadata\Concerns\Oai\MetadataPrefixChecker;
+
+use Leconfe\OaiMetadata\Classes\ExceptionCollection;
 
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
@@ -21,9 +22,9 @@ use Illuminate\Http\Request;
 
 class GetRecord implements HasVerbAction
 {
-    use VerbHandler, MetadataPrefixChecker;
+    use VerbHandler;
 
-    public function handle(Request $request, Repository $repository, Verb $verb): OaiResponse|OaiError|array 
+    public function handle(Request $request, Repository $repository, Verb $verb): OaiResponse
     {
         $paper = $repository->parseIdentifier($request->route('conference'), $request->query(Verb::QUERY_IDENTIFIER));
 
@@ -34,13 +35,17 @@ class GetRecord implements HasVerbAction
             );
         }
 
-        $newRecord = new Record($paper, $request, $repository);
-        $record = $newRecord->getRecord();
+        $newRecord = null;
 
-        if ($record instanceof OaiError) {
-            return $record;
+        try {
+            $newRecord = new Record($paper, $request, $repository);
+        } catch (ExceptionCollection $exceptions) {
+            foreach ($exceptions->getAllExceptions() as $exception) {
+                $this->errors->throw($exception);
+            }
         }
-
+        
+        $record = $newRecord?->getRecord();
         return new OaiResponse(['record' => $record]);
     }
 }

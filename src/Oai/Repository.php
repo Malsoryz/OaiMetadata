@@ -15,7 +15,7 @@ class Repository
     protected string $baseUrl;
     protected string $protocolVersion;
     protected string $earliestDatestamp;
-    protected string $deletedRecordPolicy;
+    protected $deletedRecordPolicy;
     protected Granularity $granularity;
     protected string $adminEmail;
 
@@ -27,7 +27,7 @@ class Repository
         Request $request,
         Granularity|string $granularity = 'YYYY-MM-DDThh:mm:ssZ',
         string $protocolVersion = '2.0',
-        string $deletedRecordPolicy = 'no',
+        $deletedRecordPolicy = 'no',
         array $extraDescriptionsElement = []
     )
     {
@@ -96,5 +96,10 @@ class Repository
     public function getGranularity(): Granularity
     {
         return $this->granularity;
+    }
+
+    public function getDeletedRecordPolicy()
+    {
+        return $this->deletedRecordPolicy;
     }
 }

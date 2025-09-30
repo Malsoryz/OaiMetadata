@@ -12,5 +12,5 @@ use Illuminate\Http\Request;
 
 interface HasVerbAction
 {
-    public function handle(Request $request, Repository $repository, Verb $verb): OaiResponse|OaiError|array;
+    public function handle(Request $request, Repository $repository, Verb $verb): OaiResponse;
 }

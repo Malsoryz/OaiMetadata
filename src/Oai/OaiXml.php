@@ -19,6 +19,8 @@ use Leconfe\OaiMetadata\Oai\Wrapper\Error as OaiError;
 use Leconfe\OaiMetadata\Oai\Element;
 use Leconfe\OaiMetadata\Classes\ExceptionCollection;
 
+use Leconfe\OaiMetadata\Classes\Verb as VerbClass;
+
 use DOMDocument;
 
 class OaiXml
@@ -86,7 +88,7 @@ class OaiXml
     public function handle(): static
     {
         try {
-            $response = ErrorCodes::check($this->request);
+            $response = VerbClass::getFromRequest($this->request);
             $this->currentVerb = $response;
             $getClass = new ($response->getClass());
             $getResponse = $getClass->handleVerb($this);

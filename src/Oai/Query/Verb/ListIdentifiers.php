@@ -13,7 +13,6 @@ use Leconfe\OaiMetadata\Oai\Wrapper\Error as OaiError;
 use Leconfe\OaiMetadata\Oai\Query\ErrorCodes;
 use Leconfe\OaiMetadata\Contracts\Oai\HasVerbAction;
 use Leconfe\OaiMetadata\Concerns\Oai\VerbHandler;
-use Leconfe\OaiMetadata\Concerns\Oai\MetadataPrefixChecker;
 
 use Leconfe\OaiMetadata\Classes\ExceptionCollection;
 
@@ -21,9 +20,9 @@ use Illuminate\Http\Request;
 
 class ListIdentifiers implements HasVerbAction
 {
-    use VerbHandler, MetadataPrefixChecker;
+    use VerbHandler;
 
-    public function handle(Request $request, Repository $repository, Verb $verb): OaiResponse|OaiError|array
+    public function handle(Request $request, Repository $repository, Verb $verb): OaiResponse
     {
         $conference = $request->route('conference');
 

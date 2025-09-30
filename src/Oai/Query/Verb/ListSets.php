@@ -22,7 +22,7 @@ class ListSets implements HasVerbAction
 {
     use VerbHandler;
 
-    public function handle(Request $request, Repository $repository, Verb $verb): OaiResponse|OaiError|array
+    public function handle(Request $request, Repository $repository, Verb $verb): OaiResponse
     {
         $response = Sets::makeListSets($request->route('conference'));
 
