@@ -15,6 +15,8 @@ use Leconfe\OaiMetadata\Oai\Repository;
 
 use Leconfe\OaiMetadata\Oai\Identifier\Granularity;
 
+use Leconfe\OaiMetadata\Isolated\Oai;
+
 class OaiMetadata extends Plugin
 {
     public function boot()
@@ -49,6 +51,11 @@ class OaiMetadata extends Plugin
                 return response($xml->convert()->saveXML(), 200)
                     ->header('Content-type', 'application/xml');
             })->name('oai');
+
+            Route::get('{conference:path}/oai2', function (Conference $conference, Request $request) {
+                $oai = new Oai($request);
+                dd($oai, $oai->handle());
+            })->name('oai2');
         });
     }
 }

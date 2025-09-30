@@ -34,11 +34,13 @@ class Verb
             }
         }
 
-        if (is_array($queries['verb'])) {
-            $errors->throw(new OaiError(
-                __('OaiMetadata::error.argument.repeated', ['hint' => 'verb']),
-                ErrorCodes::BAD_VERB
-            ));
+        if ($request->query(VerbEnum::QUERY_VERB)) {
+            if (is_array($queries['verb'])) {
+                $errors->throw(new OaiError(
+                    __('OaiMetadata::error.argument.repeated', ['hint' => 'verb']),
+                    ErrorCodes::BAD_VERB
+                ));
+            }
         }
 
         // // Jika verb legal atau valid
