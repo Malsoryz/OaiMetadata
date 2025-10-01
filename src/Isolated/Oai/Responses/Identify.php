@@ -1,6 +1,6 @@
 <?php
 
-namespace Leconfe\OaiMetadata\Isolated\Oai\Verbs;
+namespace Leconfe\OaiMetadata\Isolated\Oai\Responses;
 
 use Leconfe\OaiMetadata\Isolated\Interface\ResponsableVerb;
 
