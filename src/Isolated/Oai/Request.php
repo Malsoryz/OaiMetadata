@@ -6,6 +6,7 @@ use Leconfe\OaiMetadata\Isolated\Oai;
 use Leconfe\OaiMetadata\Isolated\Enums\Verb;
 use Leconfe\OaiMetadata\Isolated\Classes\ExceptionBag;
 use Leconfe\OaiMetadata\Isolated\Classes\Exception as OaiException;
+use Leconfe\OaiMetadata\Isolated\Oai\Response as OaiResponse;
 use Illuminate\Http\Request as SymfonyRequest;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -33,9 +34,9 @@ class Request
         }
     }
 
-    public function handleRequest()
+    public static function handleRequest(Oai $repository)
     {
-
+        return new OaiResponse(new Request($repository));
     }
 
     public function checkVerb(SymfonyRequest $request): ?Verb

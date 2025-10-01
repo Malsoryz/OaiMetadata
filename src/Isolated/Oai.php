@@ -40,7 +40,7 @@ class Oai
 
     public function handle()
     {
-        return new OaiRequest($this);
+        return OaiRequest::handleRequest($this);
     }
 
     public function getRequest(): Request

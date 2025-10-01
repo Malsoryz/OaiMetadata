@@ -2,21 +2,16 @@
 
 namespace Leconfe\OaiMetadata\Isolated\Oai\Responses;
 
-use Leconfe\OaiMetadata\Isolated\Interface\ResponsableVerb;
+use Leconfe\OaiMetadata\Isolated\Oai;
 use Leconfe\OaiMetadata\Isolated\Oai\Request as OaiRequest;
 use Leconfe\OaiMetadata\Isolated\Classes\ExceptionBag;
 
-class Exception implements ResponsableVerb
+class Exception
 {
     protected ExceptionBag $errors;
 
-    public function __construct(OaiRequest $source)
+    public function __construct(ExceptionBag $errors)
     {
-        $this->errors = $source->getExceptions();
-    }
-
-    public function response()
-    {
-        return $this;
+        $this->errors = $errors;
     }
 }

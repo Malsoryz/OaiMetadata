@@ -55,9 +55,11 @@ class OaiMetadata extends Plugin
             Route::get('{conference:path}/oai2', function (Conference $conference, Request $request) {
                 $oai = new Oai($request);
 
-                $response = new \Leconfe\OaiMetadata\Isolated\Oai\Response($oai->handle());
+                $req = new \Leconfe\OaiMetadata\Isolated\Oai\Request($oai);
 
-                dd($oai, $oai->handle(), $response);
+                $record = new \Leconfe\OaiMetadata\Isolated\Classes\Record($oai);
+
+                dd($oai, $oai->handle(), $req, $record);
             })->name('oai2');
         });
     }

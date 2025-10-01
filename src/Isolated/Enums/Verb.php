@@ -2,6 +2,13 @@
 
 namespace Leconfe\OaiMetadata\Isolated\Enums;
 
+use Leconfe\OaiMetadata\Isolated\Oai\Responses\Identify;
+use Leconfe\OaiMetadata\Isolated\Oai\Responses\GetRecord;
+use Leconfe\OaiMetadata\Isolated\Oai\Responses\ListRecords;
+use Leconfe\OaiMetadata\Isolated\Oai\Responses\ListSets;
+use Leconfe\OaiMetadata\Isolated\Oai\Responses\ListMetadataFormats;
+use Leconfe\OaiMetadata\Isolated\Oai\Responses\ListIdentifiers;
+
 enum Verb: string 
 {
     case Identify = 'Identify';
@@ -19,6 +26,18 @@ enum Verb: string
     public const QUERY_FROM = 'from';
     public const QUERY_UNTIL = 'until';
     public const QUERY_SET = 'set';
+
+    public function getHandlerClass(): string
+    {
+        return match ($this) {
+            self::Identify => Identify::class,
+            self::GetRecord => GetRecord::class,
+            self::ListRecords => ListRecords::class,
+            self::ListSets => ListSets::class,
+            self::ListMetadataFormats => ListMetadataFormats::class,
+            self::ListIdentifiers => ListIdentifiers::class,
+        };
+    }
 
     public function requiredArguments(): array
     {
