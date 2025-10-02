@@ -4,10 +4,13 @@ namespace Leconfe\OaiMetadata\Isolated\Classes;
 
 use Leconfe\OaiMetadata\Isolated\Oai;
 use Leconfe\OaiMetadata\Isolated\Classes\Identifier;
+use Leconfe\OaiMetadata\Isolated\Enums\Granularity;
+use Leconfe\OaiMetadata\Isolated\Interface\Serializable;
 
 class Record
 {
     protected Identifier $header;
+    protected Serializable $metadata;
 
     public function __construct(Oai $repository)
     {

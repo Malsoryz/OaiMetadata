@@ -3,7 +3,6 @@
 namespace Leconfe\OaiMetadata\Isolated\Classes;
 
 use Illuminate\Support\Str;
-use Exception;
 use InvalidArgumentException;
 
 class Set
