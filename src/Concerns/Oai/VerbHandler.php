@@ -18,6 +18,7 @@ use Leconfe\OaiMetadata\Classes\ExceptionCollection;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Carbon\Exceptions\InvalidFormatException;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\Collection;
@@ -118,7 +119,7 @@ trait VerbHandler
 
         if ($resumptionToken && ! $resumptionData) {
             $this->errors->throw(new OaiError(
-                'Invalid or Expired resumption token',
+                __('OaiMetadata::error.resumption-token'),
                 ErrorCodes::BAD_RESUMPTION_TOKEN
             ));
         }
@@ -149,9 +150,9 @@ trait VerbHandler
                 try {
                     $date = Carbon::createFromFormat($granularity, $fromQuery);
                     return $query->where('updated_at', '>=', $date);
-                } catch (\Throwable $th) {
+                } catch (InvalidFormatException $exception) {
                     $this->errors->throw(new OaiError(
-                        'Invalid argument',
+                        __('OaiMetadata::error.argument.invalid.from', ['hint' => $fromQuery]),
                         ErrorCodes::BAD_ARGUMENT
                     ));
                 }
@@ -160,38 +161,38 @@ trait VerbHandler
                 try {
                     $date = Carbon::createFromFormat($granularity, $untilQuery);
                     return $query->where('updated_at', '<=', $date);
-                } catch (\Throwable $th) {
+                } catch (InvalidFormatException $exception) {
                     $this->errors->throw(new OaiError(
-                        'Invalid argument',
+                        __('OaiMetadata::error.argument.invalid.until', ['hint' => $untilQuery]),
                         ErrorCodes::BAD_ARGUMENT
                     ));
                 }
-            })
-            ->cursorPaginate(Repository::RECORDS_LIMIT, ['*'], 'resumptionToken', Cache::get($resumptionToken)['cursorToken'] ?? null);
+            });
+            // ->cursorPaginate(Repository::RECORDS_LIMIT, ['*'], 'resumptionToken', Cache::get($resumptionToken)['cursorToken'] ?? null);
 
         $token = null;
 
-        if ($cursorToken = $submissions->nextCursor()?->encode()) {
-            $token = Str::random(35);
-            Cache::add($token, [
-                'cursorToken' => $cursorToken,
-                'metadataFormat' => $metadataFormat,
-                'set' => $set,
-                'from' => $from,
-                'until' => $until
-            ], now()->addDay());
-        }
+        // if ($cursorToken = $submissions->nextCursor()?->encode()) {
+        //     $token = Str::random(35);
+        //     Cache::add($token, [
+        //         'cursorToken' => $cursorToken,
+        //         'metadataFormat' => $metadataFormat,
+        //         'set' => $set,
+        //         'from' => $from,
+        //         'until' => $until
+        //     ], now()->addDay());
+        // }
 
         $this->resumptionToken = $token;
         $this->metadataFormat = $metadataFormat;
 
         if ($submissions->count() === 0) {
             $this->errors->throw(new OaiError(
-                'Kombinasi Query tidak menghasilkan record apapun',
+                __('OaiMetadata::error.record.no-match.all'),
                 ErrorCodes::NO_RECORD_MATCH
             ));
         }
 
-        return $submissions;
+        return $submissions->get();
     }
 }

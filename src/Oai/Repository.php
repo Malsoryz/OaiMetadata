@@ -11,8 +11,6 @@ use Leconfe\OaiMetadata\Oai\Element;
 
 class Repository
 {
-    public const RECORDS_LIMIT = 3;
-
     protected string $name;
     protected string $baseUrl;
     protected string $protocolVersion;
