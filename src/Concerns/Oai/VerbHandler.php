@@ -18,13 +18,18 @@ use Leconfe\OaiMetadata\Classes\ExceptionCollection;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\Collection;
 
 trait VerbHandler
 {
     protected ExceptionCollection $errors;
-    protected Collection $records;
+    protected $records;
     protected Submission $record;
+    protected string|null $metadataFormat = null;
+
+    protected string|null $resumptionToken = null;
 
     public function __construct()
     {
@@ -34,6 +39,16 @@ trait VerbHandler
     public function getRecords()
     {
         return $this->records;
+    }
+
+    public function getMetadataFormat()
+    {
+        return $this->metadataFormat;
+    }
+
+    public function getResumptionToken(): string|null
+    {
+        return $this->resumptionToken;
     }
 
     public function handleVerb(OaiXml $oaixml): OaiXml
@@ -58,7 +73,7 @@ trait VerbHandler
         }
         
         $attributes = [];
-        foreach ($verb->allowedQuery() as $query) {
+        foreach ($verb->allowedQuery($request) as $query) {
             if (array_key_exists($query, $request->query())) {
                 $attributes[$query] = $request->query($query);
             }
@@ -71,7 +86,7 @@ trait VerbHandler
 
     public function checkArguments(Request $request, Verb $verb)
     {
-        $requiredQueries = $verb->requiredQuery();
+        $requiredQueries = $verb->requiredQuery($request);
         foreach ($requiredQueries as $query) {
             if (! $request->query($query)) {
                 $this->errors->throw(new OaiError(
@@ -81,7 +96,7 @@ trait VerbHandler
             }
         }
 
-        $allowedQueries = $verb->allowedQuery();
+        $allowedQueries = $verb->allowedQuery($request);
         foreach (array_keys($request->query()) as $query) {
             if (! in_array($query, $allowedQueries)) {
                 $this->errors->throw(new OaiError(
@@ -93,14 +108,25 @@ trait VerbHandler
     }
 
     // check 'set', 'from' and 'until'
-    public function checkListRecords(Request $request, Repository $repository): Collection
+    public function checkListRecords(Request $request, Repository $repository)
     {
         $conference = $request->route('conference');
         $granularity = $repository->getGranularity()->getFormat();
+
+        $resumptionToken = $request->query(Verb::QUERY_RESUMPTION_TOKEN);
+        $resumptionData = Cache::get($resumptionToken);
+
+        if ($resumptionToken && ! $resumptionData) {
+            $this->errors->throw(new OaiError(
+                'Invalid or Expired resumption token',
+                ErrorCodes::BAD_RESUMPTION_TOKEN
+            ));
+        }
         
-        $set = $request->query(Verb::QUERY_SET);
-        $from = $request->query(Verb::QUERY_FROM);
-        $until = $request->query(Verb::QUERY_UNTIL);
+        $metadataFormat = $resumptionData['metadataFormat'] ?? $request->query(Verb::QUERY_METADATA_PREFIX);
+        $set = $resumptionData['set'] ?? $request->query(Verb::QUERY_SET);
+        $from = $resumptionData['from'] ?? $request->query(Verb::QUERY_FROM);
+        $until = $resumptionData['until'] ?? $request->query(Verb::QUERY_UNTIL);
         
         $submissions = $conference->submission()
             ->where('status', SubmissionStatus::Published)
@@ -140,7 +166,24 @@ trait VerbHandler
                         ErrorCodes::BAD_ARGUMENT
                     ));
                 }
-            });
+            })
+            ->cursorPaginate(Repository::RECORDS_LIMIT, ['*'], 'resumptionToken', Cache::get($resumptionToken)['cursorToken'] ?? null);
+
+        $token = null;
+
+        if ($cursorToken = $submissions->nextCursor()?->encode()) {
+            $token = Str::random(35);
+            Cache::add($token, [
+                'cursorToken' => $cursorToken,
+                'metadataFormat' => $metadataFormat,
+                'set' => $set,
+                'from' => $from,
+                'until' => $until
+            ], now()->addDay());
+        }
+
+        $this->resumptionToken = $token;
+        $this->metadataFormat = $metadataFormat;
 
         if ($submissions->count() === 0) {
             $this->errors->throw(new OaiError(
@@ -149,6 +192,6 @@ trait VerbHandler
             ));
         }
 
-        return $submissions->get();
+        return $submissions;
     }
 }

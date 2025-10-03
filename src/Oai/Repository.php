@@ -11,13 +11,15 @@ use Leconfe\OaiMetadata\Oai\Element;
 
 class Repository
 {
+    public const RECORDS_LIMIT = 3;
+
     protected string $name;
     protected string $baseUrl;
     protected string $protocolVersion;
     protected string $earliestDatestamp;
     protected $deletedRecordPolicy;
     protected Granularity $granularity;
-    protected string $adminEmail;
+    protected array $adminEmail;
 
     protected array $descriptionsElement = [];
 
@@ -38,7 +40,7 @@ class Repository
         $this->protocolVersion = $protocolVersion;
         $this->deletedRecordPolicy = $deletedRecordPolicy;
         $this->granularity = $granularity instanceof Granularity ? $granularity : Granularity::from($granularity);
-        $this->adminEmail = $conference->conferenceUsers()->role('Admin')->first()->email;
+        $this->adminEmail = $conference->conferenceUsers()->role('Admin')->get()->pluck('email')->toArray();
 
         $this->earliestDatestamp = $this->getEarlistDatestamp($conference);
 

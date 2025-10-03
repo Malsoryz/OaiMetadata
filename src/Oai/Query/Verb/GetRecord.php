@@ -38,7 +38,7 @@ class GetRecord implements HasVerbAction
         $newRecord = null;
 
         try {
-            $newRecord = new Record($paper, $request, $repository);
+            $newRecord = new Record($paper, $this->getMetadataFormat(), $repository);
         } catch (ExceptionCollection $exceptions) {
             foreach ($exceptions->getAllExceptions() as $exception) {
                 $this->errors->throw($exception);

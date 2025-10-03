@@ -19,6 +19,7 @@ use Leconfe\OaiMetadata\Contracts\Oai\HasVerbAction;
 use Leconfe\OaiMetadata\Classes\ExceptionCollection;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class ListRecords implements HasVerbAction
 {
@@ -33,7 +34,7 @@ class ListRecords implements HasVerbAction
         $records = [];
         foreach ($submissions as $paper) {
             try {
-                $newRecord = new Record($paper, $request, $repository);
+                $newRecord = new Record($paper, $this->getMetadataFormat(), $repository);
                 $record = $newRecord->getRecord();
                 $records[] = $record;
             } catch (ExceptionCollection $exceptions) {
@@ -44,6 +45,11 @@ class ListRecords implements HasVerbAction
             }
         }
 
-        return new OaiResponse(['record' => $records]);
+        // dd(Cache::get($this->getResumptionToken()));
+
+        return new OaiResponse([
+            'record' => $records,
+            ...($this->getResumptionToken() ? ['resumptionToken' => $this->getResumptionToken()] : []),
+        ]);
     }
 }

@@ -49,8 +49,14 @@ enum Verb: string
         };
     }
 
-    public function requiredQuery(): array
+    public function requiredQuery(Request $request): array
     {
+        $resumptionToken = $request->query(self::QUERY_RESUMPTION_TOKEN);
+        $queries = [
+            self::QUERY_VERB,
+            is_null($resumptionToken) ? self::QUERY_METADATA_PREFIX : self::QUERY_RESUMPTION_TOKEN,
+        ];
+
         return match ($this) {
             self::Identify => [
                 self::QUERY_VERB,
@@ -60,18 +66,28 @@ enum Verb: string
                 self::QUERY_IDENTIFIER,
                 self::QUERY_METADATA_PREFIX,
             ],
-            self::ListRecords, self::ListIdentifiers => [
-                self::QUERY_VERB,
-                self::QUERY_METADATA_PREFIX,
-            ],
+            self::ListRecords, self::ListIdentifiers => $queries,
             self::ListSets, self::ListMetadataFormats => [
                 self::QUERY_VERB,
             ],
         };
     }
 
-    public function allowedQuery(): array
+    public function allowedQuery(Request $request): array
     {
+        $resumptionToken = $request->query(self::QUERY_RESUMPTION_TOKEN);
+        $queries = [
+            self::QUERY_VERB,
+            ...(is_null($resumptionToken) ? [
+                self::QUERY_METADATA_PREFIX,
+                self::QUERY_FROM,
+                self::QUERY_UNTIL,
+                self::QUERY_SET,
+            ] : [
+                self::QUERY_RESUMPTION_TOKEN,
+            ]),
+        ];
+
         return match ($this) {
             self::Identify => [
                 self::QUERY_VERB,
@@ -81,14 +97,7 @@ enum Verb: string
                 self::QUERY_IDENTIFIER,
                 self::QUERY_METADATA_PREFIX,
             ],
-            self::ListRecords, self::ListIdentifiers => [
-                self::QUERY_VERB,
-                self::QUERY_METADATA_PREFIX,
-                self::QUERY_RESUMPTION_TOKEN,
-                self::QUERY_FROM,
-                self::QUERY_UNTIL,
-                self::QUERY_SET,
-            ],
+            self::ListRecords, self::ListIdentifiers => $queries,
             self::ListSets => [
                 self::QUERY_VERB,
                 self::QUERY_RESUMPTION_TOKEN,

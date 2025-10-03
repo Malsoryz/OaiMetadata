@@ -34,35 +34,37 @@ class Verb
             }
         }
 
-        if (is_array($queries['verb'])) {
-            $errors->throw(new OaiError(
-                __('OaiMetadata::error.argument.repeated', ['hint' => 'verb']),
-                ErrorCodes::BAD_VERB
-            ));
+        if ($queries->has('verb')) {
+            if (is_array($queries['verb'])) {
+                $errors->throw(new OaiError(
+                    __('OaiMetadata::error.argument.repeated', ['hint' => 'verb']),
+                    ErrorCodes::BAD_VERB
+                ));
+            }
         }
 
-        // // Jika verb legal atau valid
-        // if ($verb = VerbEnum::tryFrom($request->query(VerbEnum::QUERY_VERB))) {
-        //     $requiredQueries = $verb->requiredQuery();
-        //     foreach ($requiredQueries as $query) {
-        //         if (! $request->query($query)) {
-        //             $errors->throw(new OaiError(
-        //                 __('OaiMetadata::error.argument.missing', ['hint' => $query]),
-        //                 ErrorCodes::BAD_ARGUMENT,
-        //             ));
-        //         }
-        //     }
+        // Jika verb legal atau valid
+        if ($verb = VerbEnum::tryFrom($request->query(VerbEnum::QUERY_VERB))) {
+            $requiredQueries = $verb->requiredQuery($request);
+            foreach ($requiredQueries as $query) {
+                if (! $request->query($query)) {
+                    $errors->throw(new OaiError(
+                        __('OaiMetadata::error.argument.missing', ['hint' => $query]),
+                        ErrorCodes::BAD_ARGUMENT,
+                    ));
+                }
+            }
 
-        //     $allowedQueries = $verb->allowedQuery();
-        //     foreach (array_keys($request->query()) as $query) {
-        //         if (! in_array($query, $allowedQueries)) {
-        //             $errors->throw(new OaiError(
-        //                 __('OaiMetadata::error.argument.illegal', ['hint' => $query]),
-        //                 ErrorCodes::BAD_ARGUMENT
-        //             ));
-        //         }
-        //     }
-        // }
+            $allowedQueries = $verb->allowedQuery($request);
+            foreach (array_keys($request->query()) as $query) {
+                if (! in_array($query, $allowedQueries)) {
+                    $errors->throw(new OaiError(
+                        __('OaiMetadata::error.argument.illegal', ['hint' => $query]),
+                        ErrorCodes::BAD_ARGUMENT
+                    ));
+                }
+            }
+        }
 
         if ($errors->hasExceptions()) {
             throw $errors;

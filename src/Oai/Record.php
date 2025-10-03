@@ -19,22 +19,21 @@ class Record
 {
     protected ?Submission $paper;
     protected Repository $repository;
-    protected EnumMetadata|string $metadataFormat;
+    protected EnumMetadata $metadataFormat;
 
     public function __construct(
         Submission|string|int $paper, 
-        Request $request,
+        ?string $metadataFormat,
         Repository $repository
     ) {
         $this->paper = $paper instanceof Submission ? $paper : Submission::find($paper);
-        $this->request = $request;
         $this->repository = $repository;
         
-        if ($metadata = EnumMetadata::tryFrom($request->query(Verb::QUERY_METADATA_PREFIX))) {
+        if ($metadata = EnumMetadata::tryFrom($metadataFormat ?? 'oai_dc')) {
             $this->metadataFormat = $metadata;
         } else {
             throw new ExceptionCollection(OaiError::class, [new OaiError(
-                __('OaiMetadata::error.metadata.cannot-disseminate', ['hint' => $request->query(Verb::QUERY_METADATA_PREFIX)]),
+                __('OaiMetadata::error.metadata.cannot-disseminate', ['hint' => $metadataFormat]),
                 ErrorCodes::CANNOT_DISSEMINATE_FORMAT
             )]);
         }
