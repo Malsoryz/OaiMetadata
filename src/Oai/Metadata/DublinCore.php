@@ -93,7 +93,7 @@ enum DublinCore: string implements HasMetadata
         $metadataRootElement = self::METADATA_PREFIX.':'.self::ELEMENT_PREFIX;
 
         $data = [
-            'title' => $paper->getLocalizedMeta('title'),
+            'title' => $paper->getMeta('title'),
             'date' => Granularity::Second->format($paper->published_at),
             'creator' => $paper->authors->pluck('fullname')->toArray(),
             'format' => 'application/pdf',
@@ -103,16 +103,16 @@ enum DublinCore: string implements HasMetadata
                     'conference' => $paper->conference,
                     'submission' => $paper->id,
                 ]),
-                $paper->doi?->doi,
+                $paper->load('doi')->doi?->doi,
             ],
             'subject' => $paper->getMeta('keywords'),
             'source' => $paper->proceeding->seriesTitle().'; '.$paper->getMeta('article_pages'),
-            'description' => Str::of($paper->getLocalizedMeta('abstract'))->stripTags(),
+            'description' => Str::of($paper->getMeta('abstract'))->stripTags(),
             'relation' => route('livewirePageGroup.conference.pages.paper', [
                 'conference' => $paper->conference,
                 'submission' => $paper->id,
             ]),
-            'language' => array_keys($paper->getMeta('abstract')),
+            'language' => 'en',
         ];
 
         return static::makeElement($data);
