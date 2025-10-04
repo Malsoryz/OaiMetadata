@@ -103,7 +103,7 @@ enum DublinCore: string implements HasMetadata
                     'conference' => $paper->conference,
                     'submission' => $paper->id,
                 ]),
-                $paper->doi?->doi,
+                $paper->load('doi')->doi?->doi,
             ],
             'subject' => $paper->getMeta('keywords'),
             'source' => $paper->proceeding->seriesTitle().'; '.$paper->getMeta('article_pages'),

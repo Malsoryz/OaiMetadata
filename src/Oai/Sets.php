@@ -38,12 +38,12 @@ class Sets
 
     public static function makeSet(Submission $paper): array
     {
-        $prefix = $paper->conference->path;
+        $prefix = $paper->load('conference')->conference->path;
         $result = [];
 
         $result[] = $prefix;
 
-        foreach ($paper->topics as $topic) {
+        foreach ($paper->load('topics')->topics as $topic) {
             $currentTopicSet = Str::of($topic->name)->slug();
             $delimiter = self::DELIMITER;
             $result[] = "{$prefix}{$delimiter}{$currentTopicSet}";
